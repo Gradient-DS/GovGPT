@@ -144,7 +144,7 @@ const AdminPage: React.FC = () => {
     }
 
     // Text settings can be at interface level or root level
-    if (['customWelcome', 'appTitle', 'helpAndFaqURL', 'customFooter', 'logoUrl', 'faviconUrl', 'backgroundImageUrl', 'primaryColor', 'privacyPolicy', 'termsOfService'].includes(key)) {
+    if (['customWelcome', 'appTitle', 'helpAndFaqURL', 'customFooter', 'logoUrl', 'faviconUrl', 'backgroundImageUrl', 'privacyPolicy', 'termsOfService'].includes(key)) {
       // Check interface first, then root level
       const interfaceValue = startupConfig?.interface?.[key];
       if (interfaceValue !== null && interfaceValue !== undefined) {
@@ -182,7 +182,6 @@ const AdminPage: React.FC = () => {
     // Default values for all settings
     const defaults: Record<string, boolean | string | object> = {
       // Interface settings
-      endpointsMenu: true,
       modelSelect: true,
       parameters: true,
       sidePanel: true,
@@ -207,7 +206,7 @@ const AdminPage: React.FC = () => {
       logoUrl: '',
       faviconUrl: '',
       backgroundImageUrl: '',
-      primaryColor: '',
+
       // Legal & Compliance settings
       privacyPolicy: {},
       termsOfService: {},

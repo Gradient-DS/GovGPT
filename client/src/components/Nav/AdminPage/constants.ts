@@ -68,13 +68,7 @@ export const SETTING_GROUPS = {
         type: 'url' as const,
         placeholder: 'https://example.com/background.jpg'
       },
-      {
-        key: 'primaryColor',
-        label: 'Primary Brand Color',
-        description: 'Primary color for your brand (hex format)',
-        type: 'color' as const,
-        placeholder: '#3B82F6'
-      }
+
     ]
   },
   legalCompliance: {
@@ -151,14 +145,9 @@ export const SETTING_GROUPS = {
     description: 'Control what features and UI elements users can access',
     settings: [
       {
-        key: 'endpointsMenu',
-        label: 'Endpoints Menu',
-        description: 'Allow users to select different AI providers'
-      },
-      {
-        key: 'modelSelect', 
-        label: 'Model Selection',
-        description: 'Show model dropdown for each provider'
+        key: 'modelSelect',
+        label: 'Model & Endpoint Selection',
+        description: 'Allow users to choose between different AI providers and models'
       },
       {
         key: 'parameters',
@@ -167,8 +156,8 @@ export const SETTING_GROUPS = {
       },
       {
         key: 'sidePanel',
-        label: 'Side Panel',
-        description: 'Show conversation history sidebar'
+        label: 'Tools Sidebar',
+        description: 'Show sidebar with agents, prompts, memories, and other tools'
       },
       {
         key: 'presets',
@@ -209,14 +198,14 @@ export const SETTING_GROUPS = {
     settings: [
       {
         key: 'hideNoConfigModels',
-        label: 'Show All Models',
-        description: 'Include models that require user-provided API keys',
+        label: 'Enable User-Provided API Keys',
+        description: 'Allow users to add their own API keys for models when admin keys are not configured',
         inverted: true
       },
       {
         key: 'plugins',
         label: 'Legacy Plugins',
-        description: 'Enable deprecated plugins functionality'
+        description: 'Enable deprecated ChatGPT plugins functionality'
       },
       {
         key: 'webSearch',

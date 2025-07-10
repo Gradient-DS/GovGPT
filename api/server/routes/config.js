@@ -5,6 +5,7 @@ const { getCustomConfig } = require('~/server/services/Config/getCustomConfig');
 const { getLdapConfig } = require('~/server/services/Config/ldap');
 const { getProjectByName } = require('~/models/Project');
 const { getAdminConfig } = require('~/models/AdminConfig');
+const { loadDefaultInterface } = require('~/server/services/start/interface');
 const { isEnabled } = require('~/server/utils');
 const { getLogStores } = require('~/cache');
 
@@ -47,6 +48,31 @@ function mergeInterfaceConfig(interfaceConfig, adminConfig) {
   });
 
   return mergedConfig;
+}
+
+/**
+ * Generate fresh interface config with current admin overrides
+ * @param {Object} appLocals - The app.locals object with base config
+ * @param {Object} adminConfig - The current admin config with overrides
+ * @returns {Promise<Object>} The fresh interface config with admin overrides applied
+ */
+async function generateFreshInterfaceConfig(appLocals, adminConfig) {
+  // Get the latest custom config to regenerate interface config
+  const customConfig = await getCustomConfig();
+  const { getConfigDefaults } = require('librechat-data-provider');
+  const configDefaults = getConfigDefaults();
+  
+  // Regenerate the interface config with current admin overrides
+  const freshInterfaceConfig = await loadDefaultInterface(customConfig, configDefaults, adminConfig);
+  
+  logger.debug('Generated fresh interface config with admin overrides:', 
+    adminConfig ? Object.keys(adminConfig).filter(key => 
+      adminConfig[key] !== null && adminConfig[key] !== undefined && 
+      !['_id', 'version', 'createdAt', 'updatedAt'].includes(key)
+    ) : []
+  );
+  
+  return freshInterfaceConfig;
 }
 
 const router = express.Router();
@@ -143,7 +169,7 @@ router.get('/', async function (req, res) {
         isEnabled(process.env.SHOW_BIRTHDAY_ICON) ||
         process.env.SHOW_BIRTHDAY_ICON === '',
       helpAndFaqURL: adminConfig?.helpAndFaqURL ?? (process.env.HELP_AND_FAQ_URL || 'https://librechat.ai'),
-      interface: mergeInterfaceConfig(req.app.locals.interfaceConfig, adminConfig),
+      interface: await generateFreshInterfaceConfig(req.app.locals, adminConfig),
       turnstile: req.app.locals.turnstileConfig,
       modelSpecs: req.app.locals.modelSpecs,
       balance: req.app.locals.balance,

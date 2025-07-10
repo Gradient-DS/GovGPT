@@ -86,11 +86,8 @@ export const useResetAdminConfigMutation = () => {
       // Add small delay to ensure backend caches are cleared
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      // Force immediate refetch of startup config for real-time updates
-      queryClient.refetchQueries({ 
-        queryKey: [QueryKeys.startupConfig],
-        type: 'active'
-      });
+      // Invalidate all queries to ensure comprehensive cache clearing
+      queryClient.invalidateQueries();
       
       // Invalidate user role queries to update permission-based settings
       queryClient.invalidateQueries({ queryKey: [QueryKeys.roles, SystemRoles.USER] });

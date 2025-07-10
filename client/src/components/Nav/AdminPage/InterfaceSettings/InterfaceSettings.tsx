@@ -18,7 +18,7 @@ interface InterfaceSettingsProps {
   onUpdateSetting: (key: string, value: boolean) => void;
 }
 
-// Settings that depend on sidePanel being enabled
+// Settings that depend on sidePanel being enabled (all tools that live in the sidebar)
 const SIDE_PANEL_DEPENDENT_SETTINGS = ['parameters', 'prompts', 'memories', 'agents'];
 
 const InterfaceSettings: React.FC<InterfaceSettingsProps> = ({
@@ -29,21 +29,8 @@ const InterfaceSettings: React.FC<InterfaceSettingsProps> = ({
   onUpdateSetting
 }) => {
   const handleToggle = (key: string, value: boolean) => {
-    // If sidePanel is being disabled, also disable dependent settings
-    if (key === 'sidePanel' && !value) {
-      // First update the sidePanel setting
-      onUpdateSetting(key, value);
-      
-      // Then disable all dependent settings
-      SIDE_PANEL_DEPENDENT_SETTINGS.forEach(dependentKey => {
-        const currentValue = getEffectiveValue(dependentKey);
-        if (currentValue) {
-          onUpdateSetting(dependentKey, false);
-        }
-      });
-    } else {
-      onUpdateSetting(key, value);
-    }
+    // Simply pass through all setting changes - let users manage their own settings
+    onUpdateSetting(key, value);
   };
 
   // Separate settings into groups
@@ -104,7 +91,7 @@ const InterfaceSettings: React.FC<InterfaceSettingsProps> = ({
                 <ChevronRight className="w-3 h-3" />
               )}
               <span className="font-medium">
-                Side Panel Features {sidePanelEnabled ? '(Available when Side Panel is enabled)' : '(Requires Side Panel to be enabled)'}
+                Tools Sidebar Features {sidePanelEnabled ? '(Available when Tools Sidebar is enabled)' : '(Requires Tools Sidebar to be enabled)'}
               </span>
             </div>
             

@@ -1,0 +1,1 @@
+export { default as PromptPermissions } from './PromptPermissions'; 

@@ -80,11 +80,48 @@ export const useEndpoints = ({
       if (includedEndpoints.size > 0 && !includedEndpoints.has(endpoints[i])) {
         continue;
       }
+      
+      // Check if plugins are disabled and skip gptPlugins endpoint
+      if (endpoints[i] === EModelEndpoint.gptPlugins && interfaceConfig.plugins === false) {
+        continue;
+      }
+      
+      // Check if endpoint is configured by admin and if we should hide non-configured endpoints
+      if (interfaceConfig.hideNoConfigModels === true) {
+        const endpoint = endpoints[i];
+        const envModelProviders = (startupConfig as any)?.envModelProviders;
+        
+        // Map endpoints to their corresponding provider keys
+        const endpointProviderMap = {
+          [EModelEndpoint.openAI]: 'openai',
+          [EModelEndpoint.azureOpenAI]: 'azure',
+          [EModelEndpoint.google]: 'google',
+          [EModelEndpoint.anthropic]: 'anthropic',
+          [EModelEndpoint.bedrock]: 'bedrock',
+          [EModelEndpoint.assistants]: 'openai',
+          [EModelEndpoint.azureAssistants]: 'azure',
+          [EModelEndpoint.gptPlugins]: 'openai',
+        };
+        
+        const providerKey = endpointProviderMap[endpoint];
+        
+        // Hide endpoint if it requires admin configuration but isn't configured
+        if (providerKey && envModelProviders?.[providerKey] === false) {
+          continue;
+        }
+        
+        // Also hide endpoints that explicitly require user-provided keys
+        const requiresUserKey = !!getEndpointField(endpointsConfig, endpoint, 'userProvide');
+        if (requiresUserKey) {
+          continue;
+        }
+      }
+      
       result.push(endpoints[i]);
     }
 
     return result;
-  }, [endpoints, hasAgentAccess, includedEndpoints]);
+  }, [endpoints, hasAgentAccess, includedEndpoints, interfaceConfig.hideNoConfigModels, interfaceConfig.plugins, endpointsConfig, startupConfig]);
 
   const endpointRequiresUserKey = useCallback(
     (ep: string) => {

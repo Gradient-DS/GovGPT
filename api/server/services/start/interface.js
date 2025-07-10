@@ -51,6 +51,8 @@ async function loadDefaultInterface(config, configDefaults, adminConfig = null, 
     temporaryChat: adminConfig?.temporaryChat ?? interfaceConfig?.temporaryChat ?? defaults.temporaryChat,
     runCode: adminConfig?.runCode ?? interfaceConfig?.runCode ?? defaults.runCode,
     webSearch: adminConfig?.webSearch ?? interfaceConfig?.webSearch ?? defaults.webSearch,
+    plugins: adminConfig?.plugins ?? interfaceConfig?.plugins ?? defaults.plugins,
+    hideNoConfigModels: adminConfig?.hideNoConfigModels ?? interfaceConfig?.hideNoConfigModels ?? defaults.hideNoConfigModels,
     customWelcome: adminConfig?.customWelcome ?? interfaceConfig?.customWelcome ?? defaults.customWelcome,
   });
 

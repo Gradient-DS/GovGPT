@@ -2,9 +2,21 @@ import { useSetRecoilState } from 'recoil';
 import * as Ariakit from '@ariakit/react';
 import React, { useRef, useState, useMemo } from 'react';
 import { FileSearch, ImageUpIcon, TerminalSquareIcon, FileType2Icon } from 'lucide-react';
-import { EToolResources, EModelEndpoint, defaultAgentCapabilities } from 'librechat-data-provider';
+import { 
+  EToolResources, 
+  EModelEndpoint, 
+  defaultAgentCapabilities,
+  PermissionTypes,
+  Permissions
+} from 'librechat-data-provider';
 import type { EndpointFileConfig } from 'librechat-data-provider';
-import { useLocalize, useGetAgentsConfig, useFileHandling, useAgentCapabilities } from '~/hooks';
+import { 
+  useLocalize, 
+  useGetAgentsConfig, 
+  useFileHandling, 
+  useAgentCapabilities, 
+  useHasAccess 
+} from '~/hooks';
 import { FileUpload, TooltipAnchor, DropdownPopup, AttachmentIcon } from '~/components';
 import { ephemeralAgentByConvoId } from '~/store';
 import { cn } from '~/utils';
@@ -33,6 +45,16 @@ const AttachFileMenu = ({ disabled, conversationId, endpointFileConfig }: Attach
    * Use definition for agents endpoint for ephemeral agents
    * */
   const capabilities = useAgentCapabilities(agentsConfig?.capabilities ?? defaultAgentCapabilities);
+
+  const canUseFileSearch = useHasAccess({
+    permissionType: PermissionTypes.FILE_SEARCH,
+    permission: Permissions.USE,
+  });
+
+  const canRunCode = useHasAccess({
+    permissionType: PermissionTypes.RUN_CODE,
+    permission: Permissions.USE,
+  });
 
   const handleUploadClick = (isImage?: boolean) => {
     if (!inputRef.current) {
@@ -67,7 +89,7 @@ const AttachFileMenu = ({ disabled, conversationId, endpointFileConfig }: Attach
       });
     }
 
-    if (capabilities.fileSearchEnabled) {
+    if (canUseFileSearch && capabilities.fileSearchEnabled) {
       items.push({
         label: localize('com_ui_upload_file_search'),
         onClick: () => {
@@ -79,7 +101,7 @@ const AttachFileMenu = ({ disabled, conversationId, endpointFileConfig }: Attach
       });
     }
 
-    if (capabilities.codeEnabled) {
+    if (canRunCode && capabilities.codeEnabled) {
       items.push({
         label: localize('com_ui_upload_code_files'),
         onClick: () => {
@@ -95,7 +117,12 @@ const AttachFileMenu = ({ disabled, conversationId, endpointFileConfig }: Attach
     }
 
     return items;
-  }, [capabilities, localize, setToolResource, setEphemeralAgent]);
+  }, [capabilities, localize, setToolResource, setEphemeralAgent, canUseFileSearch, canRunCode]);
+
+  // Don't render the attach file menu if there are no available upload options
+  if (dropdownItems.length === 0) {
+    return null;
+  }
 
   const menuTrigger = (
     <TooltipAnchor

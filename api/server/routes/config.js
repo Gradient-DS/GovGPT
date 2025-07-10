@@ -37,6 +37,7 @@ function mergeInterfaceConfig(interfaceConfig, adminConfig) {
     'runCode',
     'agents',
     'temporaryChat',
+    'fileSearch',
   ];
 
   const mergedConfig = { ...interfaceConfig };

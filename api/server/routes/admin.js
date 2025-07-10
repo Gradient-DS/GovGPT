@@ -421,7 +421,18 @@ router.post('/endpoints', async (req, res) => {
     
     const endpoint = new CustomEndpoint(endpointData);
     await endpoint.save();
-    
+
+    // Invalidate endpoints & models cache so changes reflect immediately
+    try {
+      const { CacheKeys } = require('librechat-data-provider');
+      const { getLogStores } = require('~/cache');
+      const cache = getLogStores(CacheKeys.CONFIG_STORE);
+      await cache.del(CacheKeys.ENDPOINT_CONFIG);
+      await cache.del(CacheKeys.MODELS_CONFIG);
+    } catch (_) {
+      // Ignore cache errors
+    }
+ 
     res.status(201).json({ endpoint });
   } catch (error) {
     res.status(500).json({ 
@@ -469,7 +480,18 @@ router.put('/endpoints/:id', async (req, res) => {
       validatedData,
       { new: true, runValidators: true }
     );
-    
+
+    // Invalidate endpoints & models cache
+    try {
+      const { CacheKeys } = require('librechat-data-provider');
+      const { getLogStores } = require('~/cache');
+      const cache = getLogStores(CacheKeys.CONFIG_STORE);
+      await cache.del(CacheKeys.ENDPOINT_CONFIG);
+      await cache.del(CacheKeys.MODELS_CONFIG);
+    } catch (_) {
+      /* ignore */
+    }
+ 
     res.status(200).json({ endpoint: updatedEndpoint });
   } catch (error) {
     if (error.name === 'ZodError') {
@@ -498,6 +520,17 @@ router.delete('/endpoints/:id', async (req, res) => {
     const endpoint = await CustomEndpoint.findByIdAndDelete(id);
     if (!endpoint) {
       return res.status(404).json({ message: 'Custom endpoint not found' });
+    }
+
+    // Invalidate endpoints & models cache
+    try {
+      const { CacheKeys } = require('librechat-data-provider');
+      const { getLogStores } = require('~/cache');
+      const cache = getLogStores(CacheKeys.CONFIG_STORE);
+      await cache.del(CacheKeys.ENDPOINT_CONFIG);
+      await cache.del(CacheKeys.MODELS_CONFIG);
+    } catch (_) {
+      /* ignore */
     }
     
     res.status(200).json({ 

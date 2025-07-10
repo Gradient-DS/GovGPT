@@ -52,6 +52,7 @@ async function loadDefaultInterface(config, configDefaults, adminConfig = null, 
     runCode: adminConfig?.runCode ?? interfaceConfig?.runCode ?? defaults.runCode,
     webSearch: adminConfig?.webSearch ?? interfaceConfig?.webSearch ?? defaults.webSearch,
     plugins: adminConfig?.plugins ?? interfaceConfig?.plugins ?? defaults.plugins,
+    fileSearch: adminConfig?.fileSearch ?? interfaceConfig?.fileSearch ?? defaults.fileSearch,
     hideNoConfigModels: adminConfig?.hideNoConfigModels ?? interfaceConfig?.hideNoConfigModels ?? defaults.hideNoConfigModels,
     customWelcome: adminConfig?.customWelcome ?? interfaceConfig?.customWelcome ?? defaults.customWelcome,
   });
@@ -68,6 +69,7 @@ async function loadDefaultInterface(config, configDefaults, adminConfig = null, 
     [PermissionTypes.TEMPORARY_CHAT]: { [Permissions.USE]: loadedInterface.temporaryChat },
     [PermissionTypes.RUN_CODE]: { [Permissions.USE]: loadedInterface.runCode },
     [PermissionTypes.WEB_SEARCH]: { [Permissions.USE]: loadedInterface.webSearch },
+    [PermissionTypes.FILE_SEARCH]: { [Permissions.USE]: loadedInterface.fileSearch },
   });
   await updateAccessPermissions(SystemRoles.ADMIN, {
     [PermissionTypes.PROMPTS]: { [Permissions.USE]: loadedInterface.prompts },
@@ -81,6 +83,7 @@ async function loadDefaultInterface(config, configDefaults, adminConfig = null, 
     [PermissionTypes.TEMPORARY_CHAT]: { [Permissions.USE]: loadedInterface.temporaryChat },
     [PermissionTypes.RUN_CODE]: { [Permissions.USE]: loadedInterface.runCode },
     [PermissionTypes.WEB_SEARCH]: { [Permissions.USE]: loadedInterface.webSearch },
+    [PermissionTypes.FILE_SEARCH]: { [Permissions.USE]: loadedInterface.fileSearch },
   });
 
   let i = 0;

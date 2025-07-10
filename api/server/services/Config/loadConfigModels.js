@@ -10,11 +10,6 @@ const { getCustomConfig } = require('./getCustomConfig');
  */
 async function loadConfigModels(req) {
   const customConfig = await getCustomConfig();
-
-  if (!customConfig) {
-    return {};
-  }
-
   const { endpoints = {} } = customConfig ?? {};
   const modelsConfig = {};
   const azureEndpoint = endpoints[EModelEndpoint.azureOpenAI];
@@ -103,6 +98,37 @@ async function loadConfigModels(req) {
     for (const name of associatedNames) {
       const endpoint = endpointsMap[name];
       modelsConfig[name] = !modelData?.length ? (endpoint.models.default ?? []) : modelData;
+    }
+  }
+
+  // ============================
+  // Database-defined custom endpoints (Admin Panel)
+  // ============================
+  try {
+    const { CustomEndpoint } = require('~/db/models');
+    if (CustomEndpoint) {
+      const dbCustomEndpoints = await CustomEndpoint.find({ enabled: true }).lean();
+      for (const endpoint of dbCustomEndpoints) {
+        const { name: configName, models = [] } = endpoint;
+        const name = normalizeEndpointName(configName);
+
+        // Avoid overriding YAML endpoint model list if present
+        if (modelsConfig[name] != null && modelsConfig[name].length > 0) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        if (Array.isArray(models)) {
+          modelsConfig[name] = models;
+        }
+      }
+    }
+  } catch (error) {
+    try {
+      const { logger } = require('@librechat/data-schemas');
+      logger.error('Error loading models for database custom endpoints', error);
+    } catch (_) {
+      // noop
     }
   }
 

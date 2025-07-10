@@ -514,6 +514,7 @@ export const intefaceSchema = z
     runCode: z.boolean().optional(),
     webSearch: z.boolean().optional(),
     plugins: z.boolean().optional(),
+    fileSearch: z.boolean().optional(),
     hideNoConfigModels: z.boolean().optional(),
   })
   .default({
@@ -531,6 +532,7 @@ export const intefaceSchema = z
     runCode: true,
     webSearch: true,
     plugins: true,
+    fileSearch: true,
     hideNoConfigModels: false,
   });
 

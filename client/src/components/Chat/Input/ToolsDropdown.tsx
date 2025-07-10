@@ -72,6 +72,11 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
     permission: Permissions.USE,
   });
 
+  const canUseFileSearch = useHasAccess({
+    permissionType: PermissionTypes.FILE_SEARCH,
+    permission: Permissions.USE,
+  });
+
   const showWebSearchSettings = useMemo(() => {
     const authTypes = webSearchAuthData?.authTypes ?? [];
     if (authTypes.length === 0) return true;
@@ -140,7 +145,7 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
 
   const dropdownItems: MenuItemProps[] = [];
 
-  if (fileSearchEnabled) {
+  if (canUseFileSearch && fileSearchEnabled) {
     dropdownItems.push({
       onClick: handleFileSearchToggle,
       hideOnClick: false,
@@ -312,6 +317,11 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
         />
       ),
     });
+  }
+
+  // Don't render the dropdown if there are no available tools
+  if (dropdownItems.length === 0) {
+    return null;
   }
 
   const menuTrigger = (

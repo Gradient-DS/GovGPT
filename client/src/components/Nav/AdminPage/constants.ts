@@ -216,6 +216,11 @@ export const SETTING_GROUPS = {
         key: 'runCode',
         label: 'Code Execution',
         description: 'Enable AI to run and execute code'
+      },
+      {
+        key: 'fileSearch',
+        label: 'File Search',
+        description: 'Allow AI to search through uploaded documents and files'
       }
     ]
   },

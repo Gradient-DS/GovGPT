@@ -133,6 +133,10 @@ const adminConfigSchema: Schema<IAdminConfig> = new Schema(
       type: Boolean,
       default: null,
     },
+    fileSearch: {
+      type: Boolean,
+      default: null,
+    },
     // Registration & Authentication
     registrationEnabled: {
       type: Boolean,

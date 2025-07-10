@@ -663,6 +663,7 @@ export type AdminConfig = {
   webSearch?: boolean | null;
   runCode?: boolean | null;
   agents?: boolean | null;
+  fileSearch?: boolean | null;
   
   // Registration & Authentication
   registrationEnabled?: boolean | null;

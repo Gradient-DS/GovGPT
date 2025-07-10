@@ -36,7 +36,7 @@ export const useUpdateAdminConfigMutation = () => {
       });
       
       // Add small delay to ensure backend caches are cleared
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       // Force immediate refetch of startup config for real-time updates
       queryClient.refetchQueries({ 
@@ -47,6 +47,16 @@ export const useUpdateAdminConfigMutation = () => {
       // Invalidate user role queries to update permission-based settings
       queryClient.invalidateQueries({ queryKey: [QueryKeys.roles, SystemRoles.USER] });
       queryClient.invalidateQueries({ queryKey: [QueryKeys.roles, SystemRoles.ADMIN] });
+      
+      // Force immediate refetch of roles to ensure permissions are updated
+      queryClient.refetchQueries({ 
+        queryKey: [QueryKeys.roles, SystemRoles.USER],
+        type: 'active'
+      });
+      queryClient.refetchQueries({ 
+        queryKey: [QueryKeys.roles, SystemRoles.ADMIN],
+        type: 'active'
+      });
       
       // Also invalidate endpoints query since endpoint filtering depends on interface config
       queryClient.invalidateQueries({ queryKey: [QueryKeys.endpoints] });

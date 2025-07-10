@@ -1,5 +1,4 @@
 import React from 'react';
-import { Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SystemRoles } from 'librechat-data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
@@ -195,6 +194,7 @@ const AdminPage: React.FC = () => {
       webSearch: true,
       runCode: true,
       agents: true,
+      fileSearch: true,
       temporaryChat: true,
       betaFeatures: true,
       // Text settings

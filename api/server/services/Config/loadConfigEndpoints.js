@@ -9,13 +9,12 @@ const { getCustomConfig } = require('./getCustomConfig');
  */
 async function loadConfigEndpoints(req) {
   const customConfig = await getCustomConfig();
-
-  if (!customConfig) {
-    return {};
-  }
-
-  const { endpoints = {} } = customConfig ?? {};
+  const { endpoints = {} } = (customConfig ?? {});
   const endpointsConfig = {};
+
+  // ============================
+  // 1) YAML-defined custom endpoints (existing logic)
+  // ============================
 
   if (Array.isArray(endpoints[EModelEndpoint.custom])) {
     const customEndpoints = endpoints[EModelEndpoint.custom].filter(
@@ -52,6 +51,69 @@ async function loadConfigEndpoints(req) {
       };
     }
   }
+
+  // ============================
+  // 2) Database-defined custom endpoints (Admin Panel)
+  // ============================
+  try {
+    const { CustomEndpoint } = require('~/db/models');
+    if (CustomEndpoint) {
+      const dbCustomEndpoints = await CustomEndpoint.find({ enabled: true }).lean();
+      for (const endpoint of dbCustomEndpoints) {
+        const {
+          baseURL,
+          apiKey,
+          name: configName,
+          iconURL,
+          displayName,
+          modelDisplayLabel,
+          customParams,
+          userProvide: userProvideFlag,
+        } = endpoint;
+
+        if (!baseURL || !configName) {
+          // Skip incomplete definitions
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        const name = normalizeEndpointName(configName);
+        // Avoid overriding YAML endpoint with same name
+        if (endpointsConfig[name] != null) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        const resolvedApiKey = apiKey;
+        const resolvedBaseURL = baseURL;
+
+        endpointsConfig[name] = {
+          type: EModelEndpoint.custom,
+          userProvide:
+            typeof userProvideFlag === 'boolean'
+              ? userProvideFlag
+              : isUserProvided(resolvedApiKey),
+          userProvideURL: isUserProvided(resolvedBaseURL),
+          modelDisplayLabel: modelDisplayLabel || displayName || name,
+          iconURL,
+          customParams,
+        };
+      }
+    }
+  } catch (error) {
+    /* Silently ignore DB errors to prevent blocking config load */
+    // logger can be required conditionally to avoid circular issues
+    try {
+      const { logger } = require('@librechat/data-schemas');
+      logger.error('Error loading database custom endpoints', error);
+    } catch (_) {
+      // noop
+    }
+  }
+
+  // ============================
+  // 3) Azure specific endpoints (existing logic)
+  // ============================
 
   if (req.app.locals[EModelEndpoint.azureOpenAI]) {
     /** @type {Omit<TConfig, 'order'>} */

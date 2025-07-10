@@ -44,6 +44,7 @@ export interface IAdminConfig extends Document {
   webSearch?: boolean | null;
   runCode?: boolean | null;
   agents?: boolean | null;
+  fileSearch?: boolean | null;
   
   // Registration & Authentication
   registrationEnabled?: boolean | null;

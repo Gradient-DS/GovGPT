@@ -43,16 +43,50 @@ async function getBalanceConfig() {
  * @returns {Promise<TEndpoint | undefined>}
  */
 const getCustomEndpointConfig = async (endpoint) => {
+  // 1) Check YAML-defined endpoints first (existing logic)
   const customConfig = await getCustomConfig();
-  if (!customConfig) {
-    throw new Error(`Config not found for the ${endpoint} custom endpoint.`);
-  }
+  const { endpoints = {} } = customConfig || {};
+  const yamlCustomEndpoints = endpoints[EModelEndpoint.custom] ?? [];
 
-  const { endpoints = {} } = customConfig;
-  const customEndpoints = endpoints[EModelEndpoint.custom] ?? [];
-  return customEndpoints.find(
+  let found = yamlCustomEndpoints.find(
     (endpointConfig) => normalizeEndpointName(endpointConfig.name) === endpoint,
   );
+
+  if (found) {
+    return found;
+  }
+
+  // 2) Check database-defined custom endpoints
+  try {
+    const { CustomEndpoint } = require('~/db/models');
+    if (CustomEndpoint) {
+      const dbEndpoint = await CustomEndpoint.findOne({
+        name: { $regex: new RegExp(`^${endpoint}$`, 'i') },
+        enabled: true,
+      }).lean();
+
+      if (dbEndpoint) {
+        // Normalize structure to TEndpoint-ish shape expected by callers
+        return {
+          ...dbEndpoint,
+          modelDisplayLabel: dbEndpoint.modelDisplayLabel || dbEndpoint.displayName,
+          name: normalizeEndpointName(dbEndpoint.name),
+          type: EModelEndpoint.custom,
+        };
+      }
+    }
+  } catch (err) {
+    // Log but do not crash – absence of DB is permitted in some setups
+    try {
+      const { logger } = require('@librechat/data-schemas');
+      logger.error('[getCustomEndpointConfig] DB lookup failed', err);
+    } catch (_) {
+      /* noop */
+    }
+  }
+
+  // If still not found, throw to keep existing behaviour
+  throw new Error(`Provider ${endpoint} not supported`);
 };
 
 async function createGetMCPAuthMap() {

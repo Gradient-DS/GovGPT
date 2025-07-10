@@ -21,7 +21,7 @@ function WebSearch() {
   }
 
   return (
-    (isPinned || (webSearch && authData?.authenticated)) && (
+    (isPinned || webSearch) && (
       <CheckboxButton
         ref={badgeTriggerRef}
         className="max-w-fit"

@@ -15,7 +15,7 @@ interface ArtifactsSubMenuProps {
   handleCustomToggle: () => void;
 }
 
-const ArtifactsSubMenu = ({
+const ArtifactsSubMenu = React.forwardRef<HTMLDivElement, ArtifactsSubMenuProps>(({
   isArtifactsPinned,
   setIsArtifactsPinned,
   artifactsMode,
@@ -23,7 +23,7 @@ const ArtifactsSubMenu = ({
   handleShadcnToggle,
   handleCustomToggle,
   ...props
-}: ArtifactsSubMenuProps) => {
+}, ref) => {
   const localize = useLocalize();
 
   const menuStore = Ariakit.useMenuStore({
@@ -39,6 +39,7 @@ const ArtifactsSubMenu = ({
   return (
     <Ariakit.MenuProvider store={menuStore}>
       <Ariakit.MenuItem
+        ref={ref}
         {...props}
         hideOnClick={false}
         render={
@@ -142,6 +143,8 @@ const ArtifactsSubMenu = ({
       )}
     </Ariakit.MenuProvider>
   );
-};
+});
+
+ArtifactsSubMenu.displayName = 'ArtifactsSubMenu';
 
 export default React.memo(ArtifactsSubMenu);

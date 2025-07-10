@@ -23,7 +23,7 @@ const {
 const { getConvoTitle, getConvo, saveConvo, deleteConvos } = require('./Conversation');
 const { getPreset, getPresets, savePreset, deletePresets } = require('./Preset');
 
-module.exports = {
+const exportedModels = {
   ...methods,
   comparePassword,
   findFileById,
@@ -52,3 +52,5 @@ module.exports = {
   savePreset,
   deletePresets,
 };
+
+module.exports = exportedModels;

@@ -622,6 +622,112 @@ export type TVectorStore = {
 
 export type TThread = { id: string; createdAt: string };
 
+export type AdminConfig = {
+  // Site Branding & Content
+  customWelcome?: string | null;
+  appTitle?: string | null;
+  helpAndFaqURL?: string | null;
+  customFooter?: string | null;
+  
+  // Logo & Images
+  logoUrl?: string | null;
+  faviconUrl?: string | null;
+  backgroundImageUrl?: string | null;
+  primaryColor?: string | null;
+  
+  // Legal & Compliance
+  privacyPolicy?: {
+    externalUrl?: string | null;
+    openNewTab?: boolean | null;
+  } | null;
+  termsOfService?: {
+    externalUrl?: string | null;
+    openNewTab?: boolean | null;
+  } | null;
+  
+  // Interface Settings
+  endpointsMenu?: boolean | null;
+  modelSelect?: boolean | null;
+  parameters?: boolean | null;
+  sidePanel?: boolean | null;
+  presets?: boolean | null;
+  prompts?: boolean | null;
+  memories?: boolean | null;
+  bookmarks?: boolean | null;
+  multiConvo?: boolean | null;
+  hideNoConfigModels?: boolean | null;
+  betaFeatures?: boolean | null;
+  
+  // Model Access Control
+  plugins?: boolean | null;
+  webSearch?: boolean | null;
+  runCode?: boolean | null;
+  agents?: boolean | null;
+  
+  // Registration & Authentication
+  registrationEnabled?: boolean | null;
+  socialLoginEnabled?: boolean | null;
+  emailLoginEnabled?: boolean | null;
+  passwordResetEnabled?: boolean | null;
+  socialLogins?: string[] | null;
+  allowedDomains?: string[] | null;
+  socialLoginConfig?: Record<string, any> | null;
+  
+  // Chat Features
+  temporaryChat?: boolean | null;
+  
+  // Model Provider Configuration
+  modelProviderKeys?: Record<string, any> | null;
+  
+  // Custom Endpoints
+  customEndpoints?: any[] | null;
+};
+
+export interface CustomEndpoint {
+  _id?: string;
+  name: string;
+  displayName?: string;
+  description?: string;
+  baseURL: string;
+  apiKey?: string;
+  headers?: Record<string, string>;
+  models?: string[];
+  enabled?: boolean;
+  userProvide?: boolean;
+  iconURL?: string;
+  openAPISpec?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateCustomEndpoint {
+  name: string;
+  displayName?: string;
+  description?: string;
+  baseURL: string;
+  apiKey?: string;
+  headers?: Record<string, string>;
+  models?: string[];
+  enabled?: boolean;
+  userProvide?: boolean;
+  iconURL?: string;
+  openAPISpec?: string;
+}
+
+export interface UpdateCustomEndpoint {
+  name?: string;
+  displayName?: string;
+  description?: string;
+  baseURL?: string;
+  apiKey?: string;
+  headers?: Record<string, string>;
+  models?: string[];
+  enabled?: boolean;
+  userProvide?: boolean;
+  iconURL?: string;
+  openAPISpec?: string;
+}
+
 declare global {
   interface Window {
     google_tag_manager?: unknown;

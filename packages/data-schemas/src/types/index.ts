@@ -12,6 +12,8 @@ export * from './agent';
 export * from './role';
 export * from './action';
 export * from './assistant';
+export * from './adminConfig';
+export * from './customEndpoint';
 export * from './file';
 export * from './share';
 export * from './pluginAuth';

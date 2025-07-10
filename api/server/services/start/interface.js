@@ -12,10 +12,11 @@ const { logger } = require('~/config');
  * Loads the default interface object.
  * @param {TCustomConfig | undefined} config - The loaded custom configuration.
  * @param {TConfigDefaults} configDefaults - The custom configuration default values.
+ * @param {Object | null} [adminConfig] - The admin configuration overrides.
  * @param {SystemRoles} [roleName] - The role to load the default interface for, defaults to `'USER'`.
  * @returns {Promise<TCustomConfig['interface']>} The default interface object.
  */
-async function loadDefaultInterface(config, configDefaults, roleName = SystemRoles.USER) {
+async function loadDefaultInterface(config, configDefaults, adminConfig = null, roleName = SystemRoles.USER) {
   const { interface: interfaceConfig } = config ?? {};
   const { interface: defaults } = configDefaults;
   const hasModelSpecs = config?.modelSpecs?.list?.length > 0;
@@ -32,25 +33,25 @@ async function loadDefaultInterface(config, configDefaults, roleName = SystemRol
   /** @type {TCustomConfig['interface']} */
   const loadedInterface = removeNullishValues({
     endpointsMenu:
-      interfaceConfig?.endpointsMenu ?? (hasModelSpecs ? false : defaults.endpointsMenu),
+      adminConfig?.endpointsMenu ?? interfaceConfig?.endpointsMenu ?? (hasModelSpecs ? false : defaults.endpointsMenu),
     modelSelect:
-      interfaceConfig?.modelSelect ??
+      adminConfig?.modelSelect ?? interfaceConfig?.modelSelect ??
       (hasModelSpecs ? includesAddedEndpoints : defaults.modelSelect),
-    parameters: interfaceConfig?.parameters ?? (hasModelSpecs ? false : defaults.parameters),
-    presets: interfaceConfig?.presets ?? (hasModelSpecs ? false : defaults.presets),
-    sidePanel: interfaceConfig?.sidePanel ?? defaults.sidePanel,
-    privacyPolicy: interfaceConfig?.privacyPolicy ?? defaults.privacyPolicy,
-    termsOfService: interfaceConfig?.termsOfService ?? defaults.termsOfService,
+    parameters: adminConfig?.parameters ?? interfaceConfig?.parameters ?? (hasModelSpecs ? false : defaults.parameters),
+    presets: adminConfig?.presets ?? interfaceConfig?.presets ?? (hasModelSpecs ? false : defaults.presets),
+    sidePanel: adminConfig?.sidePanel ?? interfaceConfig?.sidePanel ?? defaults.sidePanel,
+    privacyPolicy: adminConfig?.privacyPolicy ?? interfaceConfig?.privacyPolicy ?? defaults.privacyPolicy,
+    termsOfService: adminConfig?.termsOfService ?? interfaceConfig?.termsOfService ?? defaults.termsOfService,
     mcpServers: interfaceConfig?.mcpServers ?? defaults.mcpServers,
-    bookmarks: interfaceConfig?.bookmarks ?? defaults.bookmarks,
-    memories: shouldDisableMemories ? false : (interfaceConfig?.memories ?? defaults.memories),
-    prompts: interfaceConfig?.prompts ?? defaults.prompts,
-    multiConvo: interfaceConfig?.multiConvo ?? defaults.multiConvo,
-    agents: interfaceConfig?.agents ?? defaults.agents,
-    temporaryChat: interfaceConfig?.temporaryChat ?? defaults.temporaryChat,
-    runCode: interfaceConfig?.runCode ?? defaults.runCode,
-    webSearch: interfaceConfig?.webSearch ?? defaults.webSearch,
-    customWelcome: interfaceConfig?.customWelcome ?? defaults.customWelcome,
+    bookmarks: adminConfig?.bookmarks ?? interfaceConfig?.bookmarks ?? defaults.bookmarks,
+    memories: shouldDisableMemories ? false : (adminConfig?.memories ?? interfaceConfig?.memories ?? defaults.memories),
+    prompts: adminConfig?.prompts ?? interfaceConfig?.prompts ?? defaults.prompts,
+    multiConvo: adminConfig?.multiConvo ?? interfaceConfig?.multiConvo ?? defaults.multiConvo,
+    agents: adminConfig?.agents ?? interfaceConfig?.agents ?? defaults.agents,
+    temporaryChat: adminConfig?.temporaryChat ?? interfaceConfig?.temporaryChat ?? defaults.temporaryChat,
+    runCode: adminConfig?.runCode ?? interfaceConfig?.runCode ?? defaults.runCode,
+    webSearch: adminConfig?.webSearch ?? interfaceConfig?.webSearch ?? defaults.webSearch,
+    customWelcome: adminConfig?.customWelcome ?? interfaceConfig?.customWelcome ?? defaults.customWelcome,
   });
 
   await updateAccessPermissions(roleName, {

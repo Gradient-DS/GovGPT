@@ -45,7 +45,18 @@ export async function loadServiceKey(keyPath: string): Promise<GoogleServiceKey 
       const fileContent = fs.readFileSync(absolutePath, 'utf8');
       serviceKey = JSON.parse(fileContent);
     } catch (error) {
-      logger.error(`Failed to load service key from file: ${keyPath}`, error);
+      // Only log errors if file exists but can't be read/parsed
+      // Don't log "file not found" errors since service key is optional
+      if (error && typeof error === 'object' && 'code' in error) {
+        if (error.code === 'ENOENT') {
+          // File not found - this is expected when service key is not configured
+          logger.debug(`Google service key file not found at ${keyPath} (this is normal if not using Google services)`);
+        } else {
+          logger.error(`Failed to load service key from file: ${keyPath}`, error);
+        }
+      } else {
+        logger.error(`Failed to load service key from file: ${keyPath}`, error);
+      }
       return null;
     }
   }

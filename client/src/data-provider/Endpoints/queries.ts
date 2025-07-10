@@ -31,9 +31,9 @@ export const useGetStartupConfig = (
     [QueryKeys.startupConfig],
     () => dataService.getStartupConfig(),
     {
-      staleTime: Infinity,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes instead of Infinity
+      refetchOnWindowFocus: true, // Refetch when window is focused
+      refetchOnReconnect: true, // Refetch on reconnect
       refetchOnMount: false,
       ...config,
       enabled: (config?.enabled ?? true) === true && queriesEnabled,

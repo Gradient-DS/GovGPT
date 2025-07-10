@@ -832,3 +832,105 @@ export const createMemory = (data: {
 }): Promise<{ created: boolean; memory: q.TUserMemory }> => {
   return request.post(endpoints.memories(), data);
 };
+
+/* Admin Config */
+export const getAdminConfig = (): Promise<{ adminConfig: any }> => {
+  return request.get('/api/admin/config');
+};
+
+export const updateAdminConfig = (adminConfig: any): Promise<{ adminConfig: any }> => {
+  return request.put('/api/admin/config', adminConfig);
+};
+
+export const resetAdminConfig = (): Promise<{ message: string }> => {
+  return request.delete('/api/admin/config');
+};
+
+/* User Management */
+export const getAdminUsers = (params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<{
+  users: any[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalUsers: number;
+    limit: number;
+  };
+}> => {
+  const searchParams = new URLSearchParams();
+  if (params.page) searchParams.set('page', params.page.toString());
+  if (params.limit) searchParams.set('limit', params.limit.toString());
+  if (params.search) searchParams.set('search', params.search);
+  
+  return request.get(`/api/admin/users?${searchParams.toString()}`);
+};
+
+export const getAdminUserById = (userId: string): Promise<{ user: any }> => {
+  return request.get(`/api/admin/users/${userId}`);
+};
+
+export const getAdminUserStats = (): Promise<{
+  totalUsers: number;
+  adminCount: number;
+  userCount: number;
+  verifiedUsers: number;
+  recentUsers: number;
+}> => {
+  return request.get('/api/admin/users/stats');
+};
+
+export const createAdminUser = (userData: {
+  email: string;
+  name?: string;
+  username?: string;
+  role?: string;
+  password?: string;
+}): Promise<{ user: any }> => {
+  return request.post('/api/admin/users', userData);
+};
+
+export const updateAdminUser = (userId: string, userData: {
+  email?: string;
+  name?: string;
+  username?: string;
+  role?: string;
+  emailVerified?: boolean;
+}): Promise<{ user: any }> => {
+  return request.put(`/api/admin/users/${userId}`, userData);
+};
+
+export const deleteAdminUser = (userId: string): Promise<{ message: string }> => {
+  return request.delete(`/api/admin/users/${userId}`);
+};
+
+/* Custom Endpoints */
+export const getCustomEndpoints = (): Promise<any[]> => {
+  return request.get('/api/admin/endpoints');
+};
+
+export const getCustomEndpoint = (id: string): Promise<any> => {
+  return request.get(`/api/admin/endpoints/${id}`);
+};
+
+export const createCustomEndpoint = (data: any): Promise<{ endpoint: any }> => {
+  return request.post('/api/admin/endpoints', data);
+};
+
+export const updateCustomEndpoint = (id: string, data: any): Promise<{ endpoint: any }> => {
+  return request.put(`/api/admin/endpoints/${id}`, data);
+};
+
+export const deleteCustomEndpoint = (id: string): Promise<{ message: string }> => {
+  return request.delete(`/api/admin/endpoints/${id}`);
+};
+
+export const parseOpenAPISpec = (data: { spec: string }): Promise<{ 
+  endpoints: any[];
+  models: string[];
+  info: any;
+}> => {
+  return request.post('/api/admin/endpoints/parse', data);
+};

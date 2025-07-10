@@ -21,20 +21,27 @@ export const useUpdateAdminConfigMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (adminConfig: Partial<AdminConfig>) => {
-      console.log('🌐 API mutation called with:', adminConfig);
-      const result = await dataService.updateAdminConfig(adminConfig);
-      console.log('✅ API mutation successful:', result);
-      return result;
+      return await dataService.updateAdminConfig(adminConfig);
     },
-    onSuccess: (data) => {
-      console.log('🎉 Mutation onSuccess called, invalidating queries');
+    onSuccess: async (data) => {
+      console.log('Admin config updated, invalidating caches...');
+      
       // Invalidate admin config query
       queryClient.invalidateQueries({ queryKey: [QueryKeys.adminConfig] });
       
-      // Force refetch startup config with refetchType: 'active' to override staleTime: Infinity
+      // Force refetch startup config to get updated admin overrides
       queryClient.invalidateQueries({ 
-        queryKey: [QueryKeys.startupConfig], 
-        refetchType: 'active' 
+        queryKey: [QueryKeys.startupConfig],
+        exact: false
+      });
+      
+      // Add small delay to ensure backend caches are cleared
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Force immediate refetch of startup config for real-time updates
+      queryClient.refetchQueries({ 
+        queryKey: [QueryKeys.startupConfig],
+        type: 'active'
       });
       
       // Invalidate user role queries to update permission-based settings
@@ -49,9 +56,8 @@ export const useUpdateAdminConfigMutation = () => {
       
       // Invalidate any other queries that might depend on interface configuration
       queryClient.invalidateQueries({ queryKey: [QueryKeys.tools] });
-    },
-    onError: (error) => {
-      console.error('❌ Mutation failed:', error);
+      
+      console.log('Cache invalidation complete');
     },
   });
 };
@@ -65,14 +71,25 @@ export const useResetAdminConfigMutation = () => {
     mutationFn: async () => {
       return dataService.resetAdminConfig();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      console.log('Admin config reset, invalidating caches...');
+      
       // Invalidate admin config query
       queryClient.invalidateQueries({ queryKey: [QueryKeys.adminConfig] });
       
-      // Force refetch startup config with refetchType: 'active' to override staleTime: Infinity
+      // Force refetch startup config to get updated admin overrides
       queryClient.invalidateQueries({ 
-        queryKey: [QueryKeys.startupConfig], 
-        refetchType: 'active' 
+        queryKey: [QueryKeys.startupConfig],
+        exact: false
+      });
+      
+      // Add small delay to ensure backend caches are cleared
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Force immediate refetch of startup config for real-time updates
+      queryClient.refetchQueries({ 
+        queryKey: [QueryKeys.startupConfig],
+        type: 'active'
       });
       
       // Invalidate user role queries to update permission-based settings
@@ -87,6 +104,8 @@ export const useResetAdminConfigMutation = () => {
       
       // Invalidate any other queries that might depend on interface configuration
       queryClient.invalidateQueries({ queryKey: [QueryKeys.tools] });
+      
+      console.log('Cache invalidation complete');
     },
   });
 };

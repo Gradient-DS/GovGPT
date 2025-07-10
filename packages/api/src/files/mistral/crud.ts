@@ -43,7 +43,7 @@ interface GoogleServiceAccount {
 /** Helper type for OCR request context */
 interface OCRContext {
   req: Pick<ServerRequest, 'user' | 'app'> & {
-    user?: { id: string };
+    user?: { _id: string };
     app: {
       locals?: {
         ocr?: TCustomConfig['ocr'];
@@ -234,7 +234,7 @@ async function loadAuthConfig(context: OCRContext): Promise<AuthConfig> {
   }
 
   const authValues = await context.loadAuthValues({
-    userId: context.req.user?.id || '',
+    userId: context.req.user?._id || '',
     authFields,
     optional: new Set(['OCR_BASEURL']),
   });
@@ -449,12 +449,17 @@ async function loadGoogleAuthConfig(): Promise<{
 
   if (!serviceKey) {
     throw new Error(
-      `Google service account not found or could not be loaded from ${serviceKeyPath}`,
+      `Google Vertex AI OCR requires a service account key file. Please either:
+      1. Create a service account key file at: ${serviceKeyPath}
+      2. Set the GOOGLE_SERVICE_KEY_FILE_PATH environment variable to point to your key file
+      3. Use a different OCR strategy (mistral_ocr, azure_mistral_ocr, or custom_ocr)
+
+      For more information, see the LibreChat documentation on Google Cloud setup.`,
     );
   }
 
   if (!serviceKey.client_email || !serviceKey.private_key || !serviceKey.project_id) {
-    throw new Error('Invalid Google service account configuration');
+    throw new Error('Invalid Google service account configuration. The service key must contain client_email, private_key, and project_id fields.');
   }
 
   const jwt = await createJWT(serviceKey as GoogleServiceAccount);

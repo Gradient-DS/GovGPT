@@ -26,7 +26,6 @@ const CustomEndpoints: React.FC<CustomEndpointsProps> = ({
   const { data: endpointsConfig = {}, isLoading: endpointsLoading } = useGetEndpointsQuery();
   
   // Get database endpoints from admin panel  
-  // Note: These hooks may fail if data-provider hasn't been rebuilt yet with the new API functions
   const { 
     data: databaseEndpoints = [], 
     isLoading: dbLoading, 
@@ -84,7 +83,6 @@ const CustomEndpoints: React.FC<CustomEndpointsProps> = ({
   // Format database endpoints 
   const formattedDbEndpoints = useMemo(() => {
     if (!databaseEndpoints || !Array.isArray(databaseEndpoints)) {
-      console.log('Database endpoints not array:', databaseEndpoints);
       return [];
     }
     return databaseEndpoints.map((endpoint: any) => ({
@@ -116,16 +114,15 @@ const CustomEndpoints: React.FC<CustomEndpointsProps> = ({
       description="Manage custom AI endpoints via OpenAPI specifications"
     >
       <div className="space-y-6 py-6">
-        {/* Error notice for missing API functions */}
+        {/* Error notice for API issues */}
         {dbError !== null && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <div className="flex items-start space-x-2">
               <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-amber-800">Custom Endpoints API Not Available</h4>
+                <h4 className="text-sm font-medium text-amber-800">Custom Endpoints API Error</h4>
                 <p className="text-xs text-amber-700 mt-1">
-                  The custom endpoints feature requires rebuilding the data-provider package. 
-                  Run <code className="bg-amber-100 px-1 rounded">npm run build:data-provider</code> to enable this feature.
+                  There was an issue loading custom endpoints. Please try refreshing the page.
                 </p>
               </div>
             </div>

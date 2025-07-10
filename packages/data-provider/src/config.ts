@@ -1167,6 +1167,10 @@ export enum CacheKeys {
    * key for open id exchanged tokens
    */
   OPENID_EXCHANGED_TOKENS = 'OPENID_EXCHANGED_TOKENS',
+  /**
+   * Key for admin configuration cache
+   */
+  ADMIN_CONFIG = 'adminConfig',
 }
 
 /**

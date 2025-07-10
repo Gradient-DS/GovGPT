@@ -21,6 +21,7 @@ const loadCustomConfig = require('./Config/loadCustomConfig');
 const handleRateLimits = require('./Config/handleRateLimits');
 const { loadDefaultInterface } = require('./start/interface');
 const { loadTurnstileConfig } = require('./start/turnstile');
+const { getAdminConfig } = require('~/models/AdminConfig');
 const { azureConfigSetup } = require('./start/azureOpenAI');
 const { processModelSpecs } = require('./start/modelSpecs');
 const { initializeS3 } = require('./Files/S3/initialize');
@@ -82,7 +83,8 @@ const AppService = async (app) => {
 
   const socialLogins =
     config?.registration?.socialLogins ?? configDefaults?.registration?.socialLogins;
-  const interfaceConfig = await loadDefaultInterface(config, configDefaults);
+  const adminConfig = await getAdminConfig();
+  const interfaceConfig = await loadDefaultInterface(config, configDefaults, adminConfig);
   const turnstileConfig = loadTurnstileConfig(config, configDefaults);
 
   const defaultLocals = {

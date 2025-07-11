@@ -196,7 +196,6 @@ const AdminPage: React.FC = () => {
       agents: true,
       fileSearch: true,
       temporaryChat: true,
-      betaFeatures: true,
       // Text settings
       customWelcome: '',
       appTitle: '',
@@ -441,9 +440,9 @@ const AdminPage: React.FC = () => {
               adminConfig={adminConfig}
             />
 
-            {/* Chat Settings */}
+            {/* Conversation Settings */}
             <ChatSettings
-              settings={SETTING_GROUPS.chat.settings}
+              settings={SETTING_GROUPS.conversations.settings}
               getEffectiveValue={getBooleanEffectiveValue}
               isOverride={isOverride}
               isSettingUpdating={isSettingUpdating}

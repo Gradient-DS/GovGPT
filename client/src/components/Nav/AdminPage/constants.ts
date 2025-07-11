@@ -324,20 +324,15 @@ export const SETTING_GROUPS = {
       }
     ]
   },
-  chat: {
-    title: 'Chat Features',
+  conversations: {
+    title: 'Conversation Settings',
     icon: MessageSquare,
-    description: 'Special chat features and capabilities',
+    description: 'Control how conversations are created, stored, and managed',
     settings: [
       {
         key: 'temporaryChat',
         label: 'Temporary Conversations',
         description: 'Enable conversations that are not saved to history'
-      },
-      {
-        key: 'betaFeatures',
-        label: 'Beta Features',
-        description: 'Enable access to experimental beta features in user settings'
       }
     ]
   }

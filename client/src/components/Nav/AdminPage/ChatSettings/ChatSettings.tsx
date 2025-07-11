@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { SettingGroup, ToggleSetting } from '../shared';
 
 interface ChatSettingsProps {
@@ -24,10 +24,10 @@ const ChatSettings: React.FC<ChatSettingsProps> = ({
 }) => {
   return (
     <SettingGroup
-      id="chat"
-      title="Chat Features"
-      description="Special chat features and capabilities"
-      icon={Globe}
+      id="conversations"
+      title="Conversation Settings"
+      description="Control how conversations are created, stored, and managed"
+      icon={MessageSquare}
     >
       {settings.map(setting => (
         <ToggleSetting

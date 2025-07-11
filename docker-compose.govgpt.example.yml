@@ -1,0 +1,9 @@
+services:
+  api:
+    image: ghcr.io/gradient-ds/librechat-api:${LIBRECHAT_TAG:-latest}
+
+    env_file:
+      - .env
+
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml:ro

@@ -6,6 +6,58 @@ This repository contains [LibreChat](https://librechat.ai), an open-source AI ch
 
 ## Quick Start with Docker (Recommended)
 
+> **Using the pre-built GovGPT image**
+>
+> If you just want to run the image that is automatically built from this repository, follow these two extra steps **before** you run `docker compose up`:
+>
+> 1.  **Choose how to set the tag** – either export it **or** place it in your `.env` file (you are copying this file anyway):
+>
+>     ```bash
+>     # option A – shell variable (previous example)
+>     export LIBRECHAT_TAG=feat-adminpanel_runtime
+>
+>     # option B – inside .env (recommended if you always use the GovGPT image)
+>     cp .env.example .env          # if you haven’t yet
+>     echo 'LIBRECHAT_TAG=feat-adminpanel_runtime' >> .env
+>     ```
+>
+>     Docker Compose will substitute `LIBRECHAT_TAG` from either source.
+>
+> 2.  **Ensure a config file is present** – LibreChat expects `librechat.yaml` in the project root.  If you haven’t customised it yet, just copy the example:
+>
+>     ```bash
+>     cp librechat.example.yaml librechat.yaml
+>     ```
+>
+> 3.  **Copy the override** that pins the API service to your own image (or pass it with `-f`):
+>
+>     ```bash
+>     cp docker-compose.govgpt.yml.example docker-compose.override.yml
+>     ```
+>
+>     The override contains:
+>
+>     ```yaml
+>     services:
+>       api:
+>         image: ghcr.io/gradient-ds/librechat-api:${LIBRECHAT_TAG:-latest}
+>     ```
+>
+> Now run the normal compose commands:
+>
+> ```bash
+> docker compose pull   # optional, but ensures the image is downloaded
+> docker compose up -d  # starts LibreChat using the GovGPT image
+> ```
+>
+> If you prefer **not** to create `docker-compose.override.yml`, you can supply the override explicitly:
+>
+> ```bash
+> docker compose -f docker-compose.yml -f docker-compose.govgpt.yml.example up -d
+> ```
+>
+> Either approach tells Docker Compose to substitute your `LIBRECHAT_TAG` into the image reference so that the stack uses `ghcr.io/gradient-ds/librechat-api:feat-adminpanel_runtime` instead of the default upstream image.
+
 ### Prerequisites
 
 1. **Install Docker**

@@ -9,6 +9,11 @@ In your response, remember to follow these guidelines:
 - If you don't know the answer, simply say that you don't know.
 - If you are unsure how to answer, ask for clarification.
 - Avoid mentioning that you obtained the information from the context.
+- Every factual statement that comes from the provided context MUST end with a citation.
+- Citation format is EXACTLY (filename, pg. N) when a page number is available, otherwise (filename).
+- Use one citation per statement; do not group multiple statements under one citation.
+- Do NOT deviate from this citation format, do NOT use footnotes, and do NOT mention URLs.
+- Use markdown to make the answer more readable.
 `;
 
 function createContextHandlers(req, userMessageContent) {
@@ -115,9 +120,10 @@ function createContextHandlers(req, userMessageContent) {
 
                 contextItems = queryResult.data
                   .map((item) => {
+                    const { page_number, title } = item[0].metadata ?? {};
                     const pageContent = item[0].page_content;
                     return `
-            <contextItem>
+            <contextItem page="${page_number ?? ''}" title="${title ?? ''}">
               <![CDATA[${pageContent?.trim()}]]>
             </contextItem>`;
                   })

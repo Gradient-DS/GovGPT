@@ -251,14 +251,47 @@ router.get('/', async function (req, res) {
       payload.customFooter = adminConfig?.customFooter ?? process.env.CUSTOM_FOOTER;
     }
 
-    // Detect environment-configured model providers
+    // Detect environment-configured model providers (including admin panel keys)
+    const adminKeys = adminConfig?.modelProviderKeys;
     payload.envModelProviders = {
-      openai: !!(process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY),
-      google: !!(process.env.GOOGLE_KEY || process.env.GOOGLE_SERVICE_KEY),
-      anthropic: !!process.env.ANTHROPIC_API_KEY,
-      bedrock: !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY),
-      azure: !!process.env.AZURE_OPENAI_API_KEY,
+      openai: !!(process.env.OPENAI_API_KEY || process.env.AZURE_OPENAI_API_KEY || adminKeys?.openai?.apiKey),
+      google: !!(process.env.GOOGLE_KEY || process.env.GOOGLE_SERVICE_KEY || adminKeys?.google?.apiKey),
+      anthropic: !!(process.env.ANTHROPIC_API_KEY || adminKeys?.anthropic?.apiKey),
+      bedrock: !!((process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) || (adminKeys?.bedrock?.accessKeyId && adminKeys?.bedrock?.secretAccessKey)),
+      azure: !!(process.env.AZURE_OPENAI_API_KEY || adminKeys?.azure?.apiKey),
     };
+
+    // Include admin panel model provider keys status
+    if (adminKeys) {
+      payload.modelProviderKeys = {};
+      
+      // Check each provider and include enabled status
+      if (adminKeys.openai) {
+        payload.modelProviderKeys.openai = {
+          enabled: !!adminKeys.openai.apiKey,
+        };
+      }
+      if (adminKeys.google) {
+        payload.modelProviderKeys.google = {
+          enabled: !!adminKeys.google.apiKey,
+        };
+      }
+      if (adminKeys.anthropic) {
+        payload.modelProviderKeys.anthropic = {
+          enabled: !!adminKeys.anthropic.apiKey,
+        };
+      }
+      if (adminKeys.azure) {
+        payload.modelProviderKeys.azure = {
+          enabled: !!adminKeys.azure.apiKey,
+        };
+      }
+      if (adminKeys.bedrock) {
+        payload.modelProviderKeys.bedrock = {
+          enabled: !!(adminKeys.bedrock.accessKeyId && adminKeys.bedrock.secretAccessKey),
+        };
+      }
+    }
 
     await cache.set(CacheKeys.STARTUP_CONFIG, payload);
     logger.debug('Startup config cached and sent to client');

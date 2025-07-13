@@ -101,7 +101,10 @@ const initializeClient = async ({ req, res, endpointOption, optionsOnly, overrid
     dropParams: endpointConfig.dropParams,
     customParams: endpointConfig.customParams,
     titleConvo: endpointConfig.titleConvo,
-    titleModel: endpointConfig.titleModel,
+    /* Always use the first declared default model for title generation when available */
+    titleModel: Array.isArray(endpointConfig.models?.default)
+      ? endpointConfig.models.default[0]
+      : endpointConfig.titleModel,
     forcePrompt: endpointConfig.forcePrompt,
     summaryModel: endpointConfig.summaryModel,
     modelDisplayLabel: endpointConfig.modelDisplayLabel,

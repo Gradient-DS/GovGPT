@@ -3,6 +3,7 @@ const { logger } = require('@librechat/data-schemas');
 const { loadServiceKey, isUserProvided } = require('@librechat/api');
 const { EModelEndpoint } = require('librechat-data-provider');
 const { config } = require('./EndpointService');
+const { getAdminConfig } = require('~/models/AdminConfig');
 
 const { openAIApiKey, azureOpenAIApiKey, useAzurePlugins, userProvidedOpenAI, googleKey } = config;
 
@@ -13,8 +14,13 @@ const { openAIApiKey, azureOpenAIApiKey, useAzurePlugins, userProvidedOpenAI, go
 async function loadAsyncEndpoints(req) {
   let serviceKey, googleUserProvides;
 
+  // Fetch admin config to check for Google API key set via admin panel
+  const adminConfig = await getAdminConfig();
+  const adminGoogleKey = adminConfig?.modelProviderKeys?.google?.apiKey || '';
+
   /** Check if GOOGLE_KEY is provided at all(including 'user_provided') */
-  const isGoogleKeyProvided = googleKey && googleKey.trim() !== '';
+  const isGoogleKeyProvided =
+    (googleKey && googleKey.trim() !== '') || (adminGoogleKey && adminGoogleKey.trim() !== '');
 
   if (isGoogleKeyProvided) {
     /** If GOOGLE_KEY is provided, check if it's user_provided */

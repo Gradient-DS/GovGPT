@@ -166,15 +166,12 @@ class GoogleClient extends BaseClient {
       );
     }
 
-    // Add thinking configuration
-    this.modelOptions.thinkingConfig = {
-      thinkingBudget:
-        (this.modelOptions.thinking ?? googleSettings.thinking.default)
-          ? this.modelOptions.thinkingBudget
-          : 0,
-    };
+    // Disable Gemini "thinking" feature entirely for now
+    delete this.modelOptions.thinkingConfig;
     delete this.modelOptions.thinking;
     delete this.modelOptions.thinkingBudget;
+    // Explicitly disable thinking so the schema default is not applied
+    this.modelOptions.thinking = false;
 
     this.sender =
       this.options.sender ??

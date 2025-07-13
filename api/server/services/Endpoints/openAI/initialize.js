@@ -8,6 +8,7 @@ const {
   createHandleLLMNewToken,
 } = require('@librechat/api');
 const { getUserKeyValues, checkUserKeyExpiry } = require('~/server/services/UserService');
+const { getAdminConfig } = require('~/models/AdminConfig');
 const OpenAIClient = require('~/app/clients/OpenAIClient');
 
 const initializeClient = async ({
@@ -32,14 +33,33 @@ const initializeClient = async ({
   const endpoint = overrideEndpoint ?? req.body.endpoint;
   const contextStrategy = isEnabled(OPENAI_SUMMARIZE) ? 'summarize' : null;
 
+  // Get admin config for fallback API keys
+  const adminConfig = await getAdminConfig();
+  
+  // Helper function to get effective API key (env -> admin -> null)
+  const getEffectiveApiKey = (envKey, adminProvider) => {
+    if (envKey && envKey.trim() !== '' && envKey !== 'user_provided') {
+      return envKey;
+    }
+    return adminConfig?.modelProviderKeys?.[adminProvider]?.apiKey || null;
+  };
+
+  // Helper function to get effective base URL (env -> admin -> null)
+  const getEffectiveBaseURL = (envURL, adminProvider) => {
+    if (envURL && envURL.trim() !== '' && envURL !== 'user_provided') {
+      return envURL;
+    }
+    return adminConfig?.modelProviderKeys?.[adminProvider]?.baseURL || null;
+  };
+
   const credentials = {
-    [EModelEndpoint.openAI]: OPENAI_API_KEY,
-    [EModelEndpoint.azureOpenAI]: AZURE_API_KEY,
+    [EModelEndpoint.openAI]: getEffectiveApiKey(OPENAI_API_KEY, 'openai'),
+    [EModelEndpoint.azureOpenAI]: getEffectiveApiKey(AZURE_API_KEY, 'azure'),
   };
 
   const baseURLOptions = {
-    [EModelEndpoint.openAI]: OPENAI_REVERSE_PROXY,
-    [EModelEndpoint.azureOpenAI]: AZURE_OPENAI_BASEURL,
+    [EModelEndpoint.openAI]: getEffectiveBaseURL(OPENAI_REVERSE_PROXY, 'openai'),
+    [EModelEndpoint.azureOpenAI]: getEffectiveBaseURL(AZURE_OPENAI_BASEURL, 'azure'),
   };
 
   const userProvidesKey = isUserProvided(credentials[endpoint]);

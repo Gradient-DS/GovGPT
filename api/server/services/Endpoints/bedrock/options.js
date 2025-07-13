@@ -9,6 +9,7 @@ const {
   removeNullishValues,
 } = require('librechat-data-provider');
 const { getUserKey, checkUserKeyExpiry } = require('~/server/services/UserService');
+const { getAdminConfig } = require('~/models/AdminConfig');
 
 const getOptions = async ({ req, overrideModel, endpointOption }) => {
   const {
@@ -20,26 +21,45 @@ const getOptions = async ({ req, overrideModel, endpointOption }) => {
     PROXY,
   } = process.env;
   const expiresAt = req.body.key;
-  const isUserProvided = BEDROCK_AWS_SECRET_ACCESS_KEY === AuthType.USER_PROVIDED;
-
-  let credentials = isUserProvided
-    ? await getUserKey({ userId: req.user.id, name: EModelEndpoint.bedrock })
-    : {
+  // Get admin config for fallback credentials
+  const adminConfig = await getAdminConfig();
+  
+  // Helper function to get effective Bedrock credentials (env -> admin -> null)
+  const getEffectiveBedrockCredentials = () => {
+    if (BEDROCK_AWS_SECRET_ACCESS_KEY && 
+        BEDROCK_AWS_SECRET_ACCESS_KEY.trim() !== '' && 
+        BEDROCK_AWS_SECRET_ACCESS_KEY !== AuthType.USER_PROVIDED &&
+        BEDROCK_AWS_ACCESS_KEY_ID &&
+        BEDROCK_AWS_ACCESS_KEY_ID.trim() !== '' &&
+        BEDROCK_AWS_ACCESS_KEY_ID !== AuthType.USER_PROVIDED) {
+      return {
         accessKeyId: BEDROCK_AWS_ACCESS_KEY_ID,
         secretAccessKey: BEDROCK_AWS_SECRET_ACCESS_KEY,
         ...(BEDROCK_AWS_SESSION_TOKEN && { sessionToken: BEDROCK_AWS_SESSION_TOKEN }),
       };
+    }
+    
+    const adminBedrock = adminConfig?.modelProviderKeys?.bedrock;
+    if (adminBedrock?.accessKeyId && adminBedrock?.secretAccessKey) {
+      return {
+        accessKeyId: adminBedrock.accessKeyId,
+        secretAccessKey: adminBedrock.secretAccessKey,
+        ...(adminBedrock.region && { region: adminBedrock.region }),
+      };
+    }
+    
+    return null;
+  };
+
+  const effectiveCredentials = getEffectiveBedrockCredentials();
+  const isUserProvided = effectiveCredentials === null && BEDROCK_AWS_SECRET_ACCESS_KEY === AuthType.USER_PROVIDED;
+
+  let credentials = isUserProvided
+    ? await getUserKey({ userId: req.user.id, name: EModelEndpoint.bedrock })
+    : effectiveCredentials;
 
   if (!credentials) {
     throw new Error('Bedrock credentials not provided. Please provide them again.');
-  }
-
-  if (
-    !isUserProvided &&
-    (credentials.accessKeyId === undefined || credentials.accessKeyId === '') &&
-    (credentials.secretAccessKey === undefined || credentials.secretAccessKey === '')
-  ) {
-    credentials = undefined;
   }
 
   if (expiresAt && isUserProvided) {

@@ -2,12 +2,26 @@ const path = require('path');
 const { EModelEndpoint, AuthKeys } = require('librechat-data-provider');
 const { getGoogleConfig, isEnabled, loadServiceKey } = require('@librechat/api');
 const { getUserKey, checkUserKeyExpiry } = require('~/server/services/UserService');
+const { getAdminConfig } = require('~/models/AdminConfig');
 const { GoogleClient } = require('~/app');
 
 const initializeClient = async ({ req, res, endpointOption, overrideModel, optionsOnly }) => {
   const { GOOGLE_KEY, GOOGLE_REVERSE_PROXY, GOOGLE_AUTH_HEADER, PROXY } = process.env;
-  const isUserProvided = GOOGLE_KEY === 'user_provided';
   const { key: expiresAt } = req.body;
+
+  // Get admin config for fallback API keys
+  const adminConfig = await getAdminConfig();
+  
+  // Helper function to get effective Google API key (env -> admin -> null)
+  const getEffectiveGoogleKey = () => {
+    if (GOOGLE_KEY && GOOGLE_KEY.trim() !== '' && GOOGLE_KEY !== 'user_provided') {
+      return GOOGLE_KEY;
+    }
+    return adminConfig?.modelProviderKeys?.google?.apiKey || null;
+  };
+
+  const effectiveGoogleKey = getEffectiveGoogleKey();
+  const isUserProvided = effectiveGoogleKey === null && GOOGLE_KEY === 'user_provided';
 
   let userKey = null;
   if (expiresAt && isUserProvided) {
@@ -19,7 +33,7 @@ const initializeClient = async ({ req, res, endpointOption, overrideModel, optio
 
   /** Check if GOOGLE_KEY is provided at all (including 'user_provided') */
   const isGoogleKeyProvided =
-    (GOOGLE_KEY && GOOGLE_KEY.trim() !== '') || (isUserProvided && userKey != null);
+    effectiveGoogleKey || (isUserProvided && userKey != null);
 
   if (!isGoogleKeyProvided) {
     /** Only attempt to load service key if GOOGLE_KEY is not provided */
@@ -41,7 +55,7 @@ const initializeClient = async ({ req, res, endpointOption, overrideModel, optio
     ? userKey
     : {
         [AuthKeys.GOOGLE_SERVICE_KEY]: serviceKey,
-        [AuthKeys.GOOGLE_API_KEY]: GOOGLE_KEY,
+        [AuthKeys.GOOGLE_API_KEY]: effectiveGoogleKey,
       };
 
   let clientOptions = {};

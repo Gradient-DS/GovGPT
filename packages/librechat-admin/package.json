@@ -1,0 +1,19 @@
+{
+  "name": "@govgpt/librechat-admin",
+  "version": "1.0.0",
+  "description": "GovGPT Admin Panel Plugin for LibreChat",
+  "main": "index.js",
+  "scripts": {
+    "start-dev": "node scripts/start-with-config.js",
+    "prepare-config": "node scripts/pre-start.js",
+    "dev-reload": "node scripts/dev-reload.js"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "mongoose": "^8.0.0"
+  },
+  "peerDependencies": {
+    "express": "^4.18.0"
+  }
+} 

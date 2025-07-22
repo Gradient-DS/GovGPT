@@ -120,6 +120,21 @@ const startServer = async () => {
   app.use('/api/tags', routes.tags);
   app.use('/api/mcp', routes.mcp);
 
+  // Mount optional GovGPT admin plugin
+  const tryMountGovGPTAdmin = (app) => {
+    try {
+      // eslint-disable-next-line global-require
+      const adminRouter = require('@govgpt/librechat-admin')();
+      app.use('/api/admin', adminRouter);
+      console.info('[GovGPT] Admin plugin mounted at /api/admin');
+    } catch (e) {
+      if (e.code !== 'MODULE_NOT_FOUND') {
+        console.error('[GovGPT] Error loading admin plugin:', e);
+      }
+    }
+  };
+  tryMountGovGPTAdmin(app);
+
   // Add the error controller one more time after all routes
   app.use(errorController);
 

@@ -52,6 +52,11 @@ export enum QueryKeys {
   adminConfig = 'adminConfig',
 }
 
+// Dynamic query keys that require parameters
+export const DynamicQueryKeys = {
+  agentFiles: (agentId: string) => ['agentFiles', agentId] as const,
+} as const;
+
 export enum MutationKeys {
   fileUpload = 'fileUpload',
   fileDelete = 'fileDelete',

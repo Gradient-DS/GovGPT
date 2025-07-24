@@ -9,9 +9,46 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const _ = require('lodash');
+const mongoose = require('mongoose');
 
 const BASE_PATH = process.env.BASE_CONFIG_PATH || path.resolve(process.cwd(), 'librechat.yaml');
 const MERGED_PATH = path.resolve(process.cwd(), 'librechat.merged.yaml');
+
+// Ensure MongoDB connection before model operations
+async function ensureDbConnection() {
+  
+  // If already connected, return
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+  
+  // If in the process of connecting, wait for it
+  if (mongoose.connection.readyState === 2) {
+    return new Promise((resolve) => {
+      mongoose.connection.once('connected', resolve);
+    });
+  }
+  
+  console.log('[GovGPT] Waiting for LibreChat MongoDB connection...');
+  // Wait for LibreChat's connection to be established
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('MongoDB connection timeout'));
+    }, 10000);
+    
+    const checkConnection = () => {
+      if (mongoose.connection.readyState === 1) {
+        clearTimeout(timeout);
+        console.log('[GovGPT] Using LibreChat MongoDB connection');
+        resolve();
+      } else {
+        setTimeout(checkConnection, 100);
+      }
+    };
+    
+    checkConnection();
+  });
+}
 
 function loadYamlSafe(filePath) {
   if (!fs.existsSync(filePath)) return {};
@@ -21,16 +58,19 @@ function loadYamlSafe(filePath) {
 
 async function loadAdminOverrides() {
   try {
-    // Dynamically import AdminConfig to avoid dependency issues
+    // Ensure we have a MongoDB connection first
+    await ensureDbConnection();
+    
     const AdminConfig = require('../models/AdminConfig');
-    const adminDoc = await AdminConfig.findOne();
+    // Pick the most recently updated doc to avoid stale overrides
+    const adminDoc = await AdminConfig.findOne().sort({ updatedAt: -1 }).lean().exec();
     
     if (!adminDoc || !adminDoc.overrides || Object.keys(adminDoc.overrides).length === 0) {
       console.log('[GovGPT] No admin overrides found in MongoDB');
       return {};
     }
     
-    console.log('[GovGPT] Loaded admin overrides from MongoDB:', JSON.stringify(adminDoc.overrides, null, 2));
+    console.log('[GovGPT] Loaded admin overrides from MongoDB');
     return adminDoc.overrides;
   } catch (error) {
     console.warn('[GovGPT] Failed to load admin overrides from MongoDB:', error.message);
@@ -41,7 +81,11 @@ async function loadAdminOverrides() {
 async function generateMergedYaml(options = {}) {
   try {
     const base = loadYamlSafe(BASE_PATH);
-    const adminOverrides = await loadAdminOverrides();
+    
+    // Use provided overrides if available, otherwise load from MongoDB
+    const adminOverrides = options.overrides !== undefined 
+      ? options.overrides 
+      : await loadAdminOverrides();
 
     // Deep merge admin overrides into base config
     const merged = _.merge({}, base, adminOverrides);

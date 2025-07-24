@@ -1,7 +1,7 @@
 version: 1.2.1
 cache: true
 interface:
-  customWelcome: Welkom bij GOVGPT!!!
+  customWelcome: Test 123
   mcpServers:
     placeholder: MCP Servers
   privacyPolicy:

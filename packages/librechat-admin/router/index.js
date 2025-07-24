@@ -39,11 +39,11 @@ function createRouter(options = {}) {
     }
   });
 
-  // Apply endpoint
+  // Apply endpoint - now mainly for restart signaling since config updates are immediate
   router.post('/config/apply', async (req, res) => {
     try {
       await applyChanges();
-      res.json({ message: 'Applied and restart flag written' });
+      res.json({ message: 'Restart flag written' });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }

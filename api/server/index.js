@@ -1,7 +1,10 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-require('module-alias')({ base: path.resolve(__dirname, '..') });
+require('module-alias')({ 
+  base: path.resolve(__dirname, '..'),
+  '~': path.resolve(__dirname, '..')
+});
 const cors = require('cors');
 const axios = require('axios');
 const express = require('express');
@@ -120,20 +123,13 @@ const startServer = async () => {
   app.use('/api/tags', routes.tags);
   app.use('/api/mcp', routes.mcp);
 
-  // Mount optional GovGPT admin plugin
-  const tryMountGovGPTAdmin = (app) => {
-    try {
-      // eslint-disable-next-line global-require
-      const adminRouter = require('@govgpt/librechat-admin')();
-      app.use('/api/admin', adminRouter);
-      console.info('[GovGPT] Admin plugin mounted at /api/admin');
-    } catch (e) {
-      if (e.code !== 'MODULE_NOT_FOUND') {
-        console.error('[GovGPT] Error loading admin plugin:', e);
-      }
-    }
-  };
-  tryMountGovGPTAdmin(app);
+  // Mount custom extensions
+  try {
+    require('custom')(app);
+  } catch (e) {
+    // Silent fail als custom niet bestaat
+    console.warn('[Custom] Mount failed:', e.message);
+  }
 
   // Add the error controller one more time after all routes
   app.use(errorController);

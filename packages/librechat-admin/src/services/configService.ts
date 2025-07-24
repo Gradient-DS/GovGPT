@@ -29,21 +29,34 @@ export const ALLOW_LIST = [
   // Legal & compliance objects
   'privacyPolicy',
   'termsOfService',
-  // Model access toggles
-  'hideNoConfigModels',
-  'plugins',
-  'webSearch',
-  'runCode',
-  'fileSearch',
-  // Registration flags & arrays
-  'registrationEnabled',
-  'socialLoginEnabled',
-  'emailLoginEnabled',
-  'passwordResetEnabled',
-  'socialLogins',
-  'allowedDomains',
+  // Model access toggles within interface section
+  'interface.webSearch',
+  'interface.runCode',
+  // Registration arrays (not booleans)
+  'registration.socialLogins',
+  'registration.allowedDomains',
   // Conversation settings
-  'temporaryChat'
+  'interface.temporaryChat',
+  // Agents endpoint settings
+  'endpoints.agents.recursionLimit',
+  'endpoints.agents.maxRecursionLimit',
+  'endpoints.agents.disableBuilder',
+  'endpoints.agents.capabilities',
+  'endpoints.agents.allowedProviders',
+  // Sharing / public links
+  'sharedLinksEnabled',
+  'publicSharedLinksEnabled',
+  // Actions (OpenAPI specs)
+  'actions.allowedDomains',
+  // Temporary chat retention
+  'interface.temporaryChatRetention',
+  // Balance system
+  'balance.enabled',
+  'balance.startBalance',
+  'balance.autoRefillEnabled',
+  'balance.refillIntervalValue',
+  'balance.refillIntervalUnit',
+  'balance.refillAmount',
 ];
 export const OVERLAY_PATH = process.env.ADMIN_OVERLAY_PATH || path.resolve(process.cwd(), 'admin-overrides.yaml');
 const FLAG_PATH = path.resolve(process.cwd(), 'restart.flag');
@@ -88,7 +101,38 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
   }
 
   const doc = await getOverrideDoc();
-  _.set(doc.overrides, key, value);
+  // Basic type coercion for known numeric and array settings
+  const numericKeys = new Set([
+    'endpoints.agents.recursionLimit',
+    'endpoints.agents.maxRecursionLimit',
+    'interface.temporaryChatRetention',
+    'balance.startBalance',
+    'balance.refillIntervalValue',
+    'balance.refillAmount',
+  ]);
+
+  const arrayKeys = new Set([
+    'endpoints.agents.capabilities',
+    'endpoints.agents.allowedProviders',
+    'actions.allowedDomains',
+    'registration.socialLogins',
+    'registration.allowedDomains',
+  ]);
+
+  let coercedValue: unknown = value;
+
+  if (numericKeys.has(key)) {
+    coercedValue = typeof value === 'string' ? Number(value) : value;
+  } else if (arrayKeys.has(key)) {
+    if (typeof value === 'string') {
+      coercedValue = value
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+  }
+
+  _.set(doc.overrides, key, coercedValue);
   // Inform Mongoose that a Mixed type field was mutated in place
   doc.markModified('overrides');
   doc.updatedBy = userId as any;

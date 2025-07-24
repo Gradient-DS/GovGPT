@@ -1,11 +1,11 @@
-import { Settings, Palette, Key, KeySquare, UserCheck, MessageSquare, Image, Shield } from 'lucide-react';
+import { Settings, Palette, Key, KeySquare, MessageSquare, Image, Shield, Globe, Link, Wallet } from 'lucide-react';
 
 export interface Setting {
   key: string;
   label: string;
   description: string;
-  type: 'boolean' | 'text' | 'textarea' | 'url';
-  defaultValue: boolean | string;
+  type: 'boolean' | 'text' | 'textarea' | 'url' | 'number';
+  defaultValue: boolean | string | number;
   placeholder?: string;
 }
 
@@ -168,78 +168,160 @@ export const SETTING_GROUPS: SettingGroup[] = [
     icon: Key,
     settings: [
       {
-        key: 'hideNoConfigModels',
-        label: 'Enable User-Provided API Keys',
-        description: 'Allow users to add their own API keys for models when admin keys are not configured',
-        type: 'boolean',
-        defaultValue: false
-      },
-      {
-        key: 'plugins',
-        label: 'Legacy Plugins',
-        description: 'Enable deprecated ChatGPT plugins functionality (not recommended)',
-        type: 'boolean',
-        defaultValue: false
-      },
-      {
-        key: 'webSearch',
+        key: 'interface.webSearch',
         label: 'Web Search',
         description: 'Allow AI to search the internet for current information and facts',
         type: 'boolean',
         defaultValue: true
       },
       {
-        key: 'runCode',
+        key: 'interface.runCode',
         label: 'Code Execution',
         description: 'Enable AI to run and execute code in a secure environment',
-        type: 'boolean',
-        defaultValue: true
-      },
-      {
-        key: 'fileSearch',
-        label: 'File Search',
-        description: 'Allow AI to search through uploaded documents and files',
         type: 'boolean',
         defaultValue: true
       }
     ],
   },
   {
-    id: 'registration',
-    title: 'Registration & Authentication',
-    description: 'Control how users can register and authenticate with your system',
-    icon: UserCheck,
+    id: 'agents',
+    title: 'Agent Endpoint',
+    description: 'Configure agent capabilities and limits available to users',
+    icon: Shield,
     settings: [
       {
-        key: 'registrationEnabled',
-        label: 'User Registration',
-        description: 'Allow new users to create accounts on your platform',
+        key: 'endpoints.agents.disableBuilder',
+        label: 'Disable Builder UI',
+        description: 'Hide the visual builder for creating agents',
         type: 'boolean',
-        defaultValue: true
+        defaultValue: false,
       },
       {
-        key: 'socialLoginEnabled',
-        label: 'Social Authentication',
-        description: 'Enable login with social media accounts (Google, GitHub, etc.)',
-        type: 'boolean',
-        defaultValue: true
+        key: 'endpoints.agents.recursionLimit',
+        label: 'Default Recursion Limit',
+        description: 'Maximum steps per agent run (default)',
+        type: 'number',
+        defaultValue: 25,
       },
       {
-        key: 'emailLoginEnabled',
-        label: 'Email Authentication',
-        description: 'Allow users to login with email and password',
-        type: 'boolean',
-        defaultValue: true
+        key: 'endpoints.agents.maxRecursionLimit',
+        label: 'Max Recursion Limit',
+        description: 'Absolute upper limit of recursion steps users may set',
+        type: 'number',
+        defaultValue: 100,
       },
       {
-        key: 'passwordResetEnabled',
-        label: 'Password Reset',
-        description: 'Enable password reset functionality via email',
-        type: 'boolean',
-        defaultValue: true
-      }
+        key: 'endpoints.agents.allowedProviders',
+        label: 'Allowed Providers',
+        description: 'Comma-separated list of endpoint providers that agents may use (e.g. openAI, google)',
+        type: 'text',
+        defaultValue: '',
+        placeholder: 'openAI, google',
+      },
+      {
+        key: 'endpoints.agents.capabilities',
+        label: 'Agent Capabilities',
+        description: 'Comma-separated capabilities to expose (execute_code, web_search, etc.)',
+        type: 'text',
+        defaultValue: '',
+        placeholder: 'execute_code, web_search, actions',
+      },
     ],
   },
+
+  {
+    id: 'sharing',
+    title: 'Sharing & Links',
+    description: 'Control shared-link functionality',
+    icon: Link,
+    settings: [
+      {
+        key: 'sharedLinksEnabled',
+        label: 'Enable Share Links',
+        description: 'Allow users to create shareable conversation links',
+        type: 'boolean',
+        defaultValue: true,
+      },
+      {
+        key: 'publicSharedLinksEnabled',
+        label: 'Public Share Links',
+        description: 'Allow share links to be viewed without login',
+        type: 'boolean',
+        defaultValue: false,
+      },
+    ],
+  },
+
+  {
+    id: 'actions',
+    title: 'Actions (OpenAPI)',
+    description: 'Restrict what external domains can be called by actions',
+    icon: Globe,
+    settings: [
+      {
+        key: 'actions.allowedDomains',
+        label: 'Allowed Domains',
+        description: 'Comma-separated list of domains agents/assistants may call',
+        type: 'textarea',
+        defaultValue: '',
+        placeholder: 'swapi.dev, librechat.ai',
+      },
+    ],
+  },
+
+  {
+    id: 'balance',
+    title: 'Token Balance',
+    description: 'Configure token usage limits and auto-refill',
+    icon: Wallet,
+    settings: [
+      {
+        key: 'balance.enabled',
+        label: 'Enable Balance System',
+        description: 'Track and restrict token usage per user',
+        type: 'boolean',
+        defaultValue: false,
+      },
+      {
+        key: 'balance.startBalance',
+        label: 'Starting Balance',
+        description: 'Tokens each new account begins with',
+        type: 'number',
+        defaultValue: 0,
+      },
+      {
+        key: 'balance.autoRefillEnabled',
+        label: 'Auto Refill',
+        description: 'Automatically top-up user tokens on an interval',
+        type: 'boolean',
+        defaultValue: false,
+      },
+      {
+        key: 'balance.refillIntervalValue',
+        label: 'Refill Interval – Value',
+        description: 'Numeric part of interval (e.g. 1, 24, 7)',
+        type: 'number',
+        defaultValue: 1,
+      },
+      {
+        key: 'balance.refillIntervalUnit',
+        label: 'Refill Interval – Unit',
+        description: 'seconds, minutes, hours, days, weeks, months',
+        type: 'text',
+        defaultValue: 'days',
+        placeholder: 'hours',
+      },
+      {
+        key: 'balance.refillAmount',
+        label: 'Refill Amount',
+        description: 'Tokens added each interval',
+        type: 'number',
+        defaultValue: 0,
+      },
+    ],
+  },
+
+  // Update Conversations group (add retention + toggle)
   {
     id: 'conversations',
     title: 'Conversation Settings',
@@ -247,12 +329,19 @@ export const SETTING_GROUPS: SettingGroup[] = [
     icon: MessageSquare,
     settings: [
       {
-        key: 'temporaryChat',
+        key: 'interface.temporaryChat',
         label: 'Temporary Conversations',
         description: 'Enable conversations that are not saved to user history',
         type: 'boolean',
-        defaultValue: false
-      }
+        defaultValue: false,
+      },
+      {
+        key: 'interface.temporaryChatRetention',
+        label: 'Temporary Chat Retention (hours)',
+        description: 'How long temporary chats are kept before deletion (1-8760)',
+        type: 'number',
+        defaultValue: 720,
+      },
     ],
   },
 ]; 

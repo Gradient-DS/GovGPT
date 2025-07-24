@@ -17,7 +17,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   onUpdateSetting,
 }) => {
   return (
-    <section id={group.id} className="mb-12 min-h-[50vh]">
+    <section id={group.id} className="mb-8">
       <div className="mb-6">
         <div className="flex items-center mb-2">
           <group.icon className="w-5 h-5" />
@@ -43,17 +43,24 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             );
           }
 
-          if (['text', 'textarea', 'url'].includes(setting.type)) {
+          if (['text', 'textarea', 'url', 'number'].includes(setting.type)) {
             return (
               <SettingText
                 key={setting.key}
                 label={setting.label}
                 description={setting.description}
-                type={setting.type as 'text' | 'textarea' | 'url'}
+                type={
+                  setting.type === 'number' ? 'text' : (setting.type as 'text' | 'textarea' | 'url')
+                }
                 value={String(current)}
                 placeholder={setting.placeholder}
                 disabled={saving}
-                onBlur={(v) => onUpdateSetting(setting.key, v)}
+                onBlur={(v) =>
+                  onUpdateSetting(
+                    setting.key,
+                    setting.type === 'number' ? Number(v) : v,
+                  )
+                }
               />
             );
           }

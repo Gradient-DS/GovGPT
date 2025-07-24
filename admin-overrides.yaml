@@ -7,3 +7,5 @@ interface:
   parameters: true
   presets: true
 registrationEnabled: true
+balance:
+  enabled: true

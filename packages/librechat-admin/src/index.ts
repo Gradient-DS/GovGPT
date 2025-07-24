@@ -1,4 +1,5 @@
-import createRouter from './router';
+import { buildAdminRouter } from './router';
+import path from 'path';
 import { generateMergedYaml } from './services/generateMergedConfig';
 
 /**
@@ -18,7 +19,16 @@ async function initializeAdminPlugin(): Promise<void> {
 function adminPlugin(options: Record<string, unknown> = {}) {
   // Fire-and-forget initialization
   void initializeAdminPlugin();
-  return createRouter(options);
+
+  // Resolve LibreChat's JWT authentication middleware at runtime
+  // We intentionally avoid using module aliases here so the path works in both
+  // dev (host) and production (Docker) environments.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const requireJwtAuth = require(
+    path.join(process.cwd(), 'api', 'server', 'middleware', 'requireJwtAuth'),
+  );
+
+  return buildAdminRouter(requireJwtAuth, options);
 }
 
 // CommonJS compatibility

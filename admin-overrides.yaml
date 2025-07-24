@@ -1,2 +1,9 @@
 interface:
-  customWelcome: Test 123456
+  customWelcome: Welkom bij GovGPT!
+  sidePanel: true
+  memories: false
+  multiConvo: false
+  modelSelect: true
+  parameters: true
+  presets: true
+registrationEnabled: true

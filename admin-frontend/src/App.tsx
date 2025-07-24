@@ -1,187 +1,39 @@
-import React, { useEffect, useState, type FC } from 'react';
-
-interface AdminConfigResponse {
-  overrides?: {
-    interface?: {
-      customWelcome?: string;
-    };
-  };
-}
+import React, { type FC, useMemo } from 'react';
+import { useAdminConfig } from './hooks/useAdminConfig';
+import { SETTING_GROUPS } from './constants';
+import { AdminLayout } from './components';
+import { createValuesMap } from './utils/helpers';
 
 const App: FC = () => {
-  const [welcome, setWelcome] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState<boolean>(false);
+  const { overrides, loading, error, saving, updateSetting, applyChanges } = useAdminConfig();
 
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const res = await fetch('/api/admin/config');
-        if (!res.ok) throw new Error(await res.text());
-        const data: AdminConfigResponse = await res.json();
-        setWelcome(data.overrides?.interface?.customWelcome ?? '');
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const values = useMemo<Record<string, unknown>>(() => {
+    return createValuesMap(overrides, SETTING_GROUPS);
+  }, [overrides]);
 
-    fetchConfig();
-  }, []);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-lg">Loading…</p>
+      </div>
+    );
+  }
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await fetch('/api/admin/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'interface.customWelcome', value: welcome }),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      alert('✅ Saved to database! Use "Apply & Restart" to see changes.');
-    } catch (err) {
-      alert('❌ Error: ' + (err as Error).message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleRestart = async () => {
-    setSaving(true);
-    try {
-      const res = await fetch('/api/admin/config/apply', { method: 'POST' });
-      if (!res.ok) throw new Error(await res.text());
-      alert(
-        '✅ Restart flag written!\n\n🔄 In development: manually restart the backend to see changes.\n🚀 In production: the Docker reloader will restart the API automatically.',
-      );
-    } catch (err) {
-      alert('❌ Error: ' + (err as Error).message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) return <p>Loading…</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-lg text-red-600">Error: {error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: 600, margin: '2rem auto', fontFamily: 'sans-serif' }}>
-      <h1>GovGPT Admin – Custom Welcome</h1>
-
-      <div
-        style={{
-          marginBottom: '1rem',
-          padding: '1rem',
-          backgroundColor: '#f0f9ff',
-          border: '1px solid #0369a1',
-          borderRadius: '0.5rem',
-        }}
-      >
-        <h3 style={{ margin: '0 0 0.5rem 0', color: '#0369a1' }}>Quick Start Workflow:</h3>
-        <ol style={{ margin: 0, paddingLeft: '1.5rem' }}>
-          <li>
-            <strong>Start LibreChat with admin config:</strong>
-            <br />
-            <code
-              style={{
-                backgroundColor: '#e0f2fe',
-                padding: '0.2rem 0.4rem',
-                borderRadius: '0.25rem',
-              }}
-            >
-              cd packages/librechat-admin && npm run start-dev
-            </code>
-          </li>
-          <li>Edit the welcome message below</li>
-          <li>Click "Save" to store in database</li>
-          <li>Click "Restart" to write the restart flag</li>
-          <li>Restart LibreChat to see changes</li>
-        </ol>
-      </div>
-
-      <textarea
-        style={{ width: '100%', height: 120, marginBottom: '1rem' }}
-        value={welcome}
-        onChange={(e) => setWelcome(e.target.value)}
-        placeholder="Enter your custom welcome message..."
-      />
-
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#059669',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.25rem',
-            cursor: saving ? 'not-allowed' : 'pointer',
-            opacity: saving ? 0.6 : 1,
-          }}
-        >
-          {saving ? 'Saving...' : 'Save to Database'}
-        </button>
-
-        <button
-          onClick={handleRestart}
-          disabled={saving}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.25rem',
-            cursor: saving ? 'not-allowed' : 'pointer',
-            opacity: saving ? 0.6 : 1,
-          }}
-        >
-          {saving ? 'Restarting...' : 'Restart'}
-        </button>
-      </div>
-
-      <div
-        style={{
-          marginTop: '2rem',
-          padding: '1rem',
-          backgroundColor: '#fef3c7',
-          border: '1px solid #f59e0b',
-          borderRadius: '0.5rem',
-        }}
-      >
-        <h4 style={{ margin: '0 0 0.5rem 0', color: '#92400e' }}>Alternative Methods:</h4>
-        <div style={{ fontSize: '0.875rem', color: '#92400e' }}>
-          <p style={{ margin: '0.5rem 0' }}>
-            <strong>Manual config generation:</strong>
-            <br />
-            <code
-              style={{
-                backgroundColor: '#fef7cd',
-                padding: '0.2rem 0.4rem',
-                borderRadius: '0.25rem',
-              }}
-            >
-              node packages/librechat-admin/scripts/dev-reload.js
-            </code>
-          </p>
-          <p style={{ margin: '0.5rem 0' }}>
-            <strong>Start with pre-generated config:</strong>
-            <br />
-            <code
-              style={{
-                backgroundColor: '#fef7cd',
-                padding: '0.2rem 0.4rem',
-                borderRadius: '0.25rem',
-              }}
-            >
-              CONFIG_PATH=librechat.merged.yaml npm run backend:dev
-            </code>
-          </p>
-        </div>
-      </div>
-    </div>
+    <AdminLayout
+      values={values}
+      saving={saving}
+      onUpdateSetting={updateSetting}
+      onApplyChanges={applyChanges}
+    />
   );
 };
 

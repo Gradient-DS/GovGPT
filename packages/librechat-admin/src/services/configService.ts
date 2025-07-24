@@ -6,7 +6,45 @@ import mongoose from 'mongoose';
 import AdminConfig from '../models/AdminConfig';
 import { generateMergedYaml } from './generateMergedConfig';
 
-export const ALLOW_LIST = ['interface.customWelcome'];
+export const ALLOW_LIST = [
+  // Interface feature toggles
+  'interface.customWelcome',
+  'interface.modelSelect',
+  'interface.parameters',
+  'interface.sidePanel',
+  'interface.presets',
+  'interface.prompts',
+  'interface.memories',
+  'interface.bookmarks',
+  'interface.multiConvo',
+  'interface.agents',
+  'interface.endpointsMenu',
+  // Site branding & text / images
+  'appTitle',
+  'helpAndFaqURL',
+  'customFooter',
+  'logoUrl',
+  'faviconUrl',
+  'backgroundImageUrl',
+  // Legal & compliance objects
+  'privacyPolicy',
+  'termsOfService',
+  // Model access toggles
+  'hideNoConfigModels',
+  'plugins',
+  'webSearch',
+  'runCode',
+  'fileSearch',
+  // Registration flags & arrays
+  'registrationEnabled',
+  'socialLoginEnabled',
+  'emailLoginEnabled',
+  'passwordResetEnabled',
+  'socialLogins',
+  'allowedDomains',
+  // Conversation settings
+  'temporaryChat'
+];
 export const OVERLAY_PATH = process.env.ADMIN_OVERLAY_PATH || path.resolve(process.cwd(), 'admin-overrides.yaml');
 const FLAG_PATH = path.resolve(process.cwd(), 'restart.flag');
 

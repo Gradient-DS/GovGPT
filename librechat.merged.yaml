@@ -1,7 +1,7 @@
 version: 1.2.1
 cache: true
 interface:
-  customWelcome: Test 123
+  customWelcome: Test 123456
   mcpServers:
     placeholder: MCP Servers
   privacyPolicy:

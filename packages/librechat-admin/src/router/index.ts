@@ -73,7 +73,7 @@ export function buildAdminRouter(
    * header obtained via /api/auth/refresh.
    */
 
-  const protectedPaths = ['/health', '/config*'];
+  const protectedPaths = ['/health', '/config*', '/users*'];
 
   router.use(protectedPaths, (req: any, res: any, next: any) => {
     console.log('Applying LibreChat requireJwtAuth middleware...');
@@ -184,6 +184,113 @@ export function buildAdminRouter(
     } catch (err: any) {
       console.log('Config apply error:', err);
       res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ---------- User Management Endpoints ----------
+  const {
+    listUsers,
+    getUser,
+    createUser: createUserSvc,
+    updateUserById,
+    deleteUserCompletely,
+    getUserBalance,
+    updateUserBalance,
+    getUserStats,
+  } = require('../services/userService');
+
+  // List users with pagination / search
+  router.get('/users', async (req, res) => {
+    try {
+      const { page = '1', limit = '20', search = '' } = req.query as Record<string, string>;
+      const result = await listUsers({
+        page: parseInt(page, 10),
+        limit: parseInt(limit, 10),
+        search,
+      });
+      res.json(result);
+    } catch (err: any) {
+      console.error('[admin/users] list error', err);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Create user
+  router.post('/users', async (req, res) => {
+    try {
+      const user = await createUserSvc(req.body);
+      res.status(201).json(user);
+    } catch (err: any) {
+      console.error('[admin/users] create error', err);
+      res.status(400).json({ message: err.message });
+    }
+  });
+
+  // User statistics for dashboard cards (place BEFORE /users/:id)
+  router.get('/users/stats', async (_req, res) => {
+    try {
+      const stats = await getUserStats();
+      res.json(stats);
+    } catch (err: any) {
+      console.error('[admin/users] stats error', err);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Get user detail
+  router.get('/users/:id', async (req, res) => {
+    try {
+      const user = await getUser(req.params.id);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+      res.json(user);
+    } catch (err: any) {
+      console.error('[admin/users] get error', err);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Update user
+  router.put('/users/:id', async (req, res) => {
+    try {
+      const updated = await updateUserById(req.params.id, req.body);
+      res.json(updated);
+    } catch (err: any) {
+      console.error('[admin/users] update error', err);
+      res.status(400).json({ message: err.message });
+    }
+  });
+
+  // Delete user
+  router.delete('/users/:id', async (req, res) => {
+    try {
+      await deleteUserCompletely(req.params.id);
+      res.status(204).send();
+    } catch (err: any) {
+      console.error('[admin/users] delete error', err);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Balance endpoints
+  router.get('/users/:id/balance', async (req, res) => {
+    try {
+      const balance = await getUserBalance(req.params.id);
+      // If no balance record exists, respond with default zero credits instead of 404
+      if (!balance) return res.json({ tokenCredits: 0 });
+      res.json(balance);
+    } catch (err: any) {
+      console.error('[admin/users] balance get error', err);
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  router.put('/users/:id/balance', async (req, res) => {
+    try {
+      const balance = await updateUserBalance(req.params.id, req.body);
+      res.json(balance);
+    } catch (err: any) {
+      console.error('[admin/users] balance update error', err);
+      res.status(400).json({ message: err.message });
     }
   });
 

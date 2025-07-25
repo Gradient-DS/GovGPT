@@ -56,13 +56,45 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Desktop Header */}
-        <h2 className="text-base font-semibold text-gray-700 mb-4 hidden md:block">
-          Settings
-        </h2>
-
         <nav className="space-y-1">
-          {SETTING_GROUPS.map((group) => {
+          {/* User Management subheader */}
+          <h3 className="mt-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            User Management
+          </h3>
+          {SETTING_GROUPS.filter(g => g.id === 'users').map((group) => {
+            const Icon = group.icon;
+            const isActive = group.id === active;
+            return (
+              <button
+                key={group.id}
+                onClick={() => handleSectionSelect(group.id)}
+                className={`
+                  w-full flex items-center gap-3 px-3 py-3 text-sm rounded-lg transition-all duration-200
+                  min-h-[44px] text-left
+                  ${isActive 
+                    ? 'bg-blue-500 text-white' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                  }
+                `}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+                  {group.title}
+                </span>
+                {isActive && (
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+
+          {/* Settings subheader */}
+          <h3 className="mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Settings
+          </h3>
+          {SETTING_GROUPS.filter(g => g.id !== 'users').map((group) => {
             const Icon = group.icon;
             const isActive = group.id === active;
             return (

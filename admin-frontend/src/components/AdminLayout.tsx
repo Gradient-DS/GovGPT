@@ -1,5 +1,6 @@
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import { SETTING_GROUPS } from '../constants';
+import UsersSection from './UsersSection';
 import { useIntersectionObserver, useScrollNavigation } from '../hooks';
 import { AdminHeader, SettingsSection } from './';
 import Sidebar from './Sidebar';
@@ -74,15 +75,27 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           className="flex-1 overflow-y-auto h-full flex justify-center"
         >
           <div className="w-full max-w-3xl p-8 min-w-80">
-            {SETTING_GROUPS.map((group) => (
-              <SettingsSection
-                key={group.id}
-                group={group}
-                values={values}
-                saving={saving}
-                onUpdateSetting={onUpdateSetting}
-              />
-            ))}
+            {SETTING_GROUPS.map((group) => {
+              if (group.id === 'users') {
+                return (
+                  <UsersSection
+                    key={group.id}
+                    values={values}
+                    saving={saving}
+                    onUpdateSetting={onUpdateSetting}
+                  />
+                );
+              }
+              return (
+                <SettingsSection
+                  key={group.id}
+                  group={group}
+                  values={values}
+                  saving={saving}
+                  onUpdateSetting={onUpdateSetting}
+                />
+              );
+            })}
 
             <div className="h-20" />
           </div>

@@ -19,15 +19,17 @@ export const useIntersectionObserver = ({
     (entries: IntersectionObserverEntry[]) => {
       if (isProgrammaticScroll.current) return;
 
-      const intersectingEntries = entries
+      // Choose the section with the largest visible area to avoid flickering
+      const bestMatch = entries
         .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        .map((entry) => ({
+          id: entry.target.id,
+          area: entry.intersectionRect.width * entry.intersectionRect.height,
+        }))
+        .sort((a, b) => b.area - a.area)[0];
 
-      if (intersectingEntries.length > 0) {
-        const newActiveId = intersectingEntries[0].target.id;
-        if (newActiveId) {
-          onSectionChange(newActiveId);
-        }
+      if (bestMatch && bestMatch.id) {
+        onSectionChange(bestMatch.id);
       }
     },
     [onSectionChange, isProgrammaticScroll]
@@ -43,8 +45,10 @@ export const useIntersectionObserver = ({
 
     observerRef.current = new IntersectionObserver(observerCallback, {
       root: container,
+      // Focus on the centre band (20% top & bottom margins) to stabilise detection
       rootMargin: '-40% 0px -40% 0px',
-      threshold: [0, 0.25, 0.5, 0.75, 1.0],
+      // Only need a zero threshold – we compute visible area ourselves
+      threshold: [0],
     });
 
     const startObserving = () => {

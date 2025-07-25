@@ -24,7 +24,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ saving, onApplyChanges
         
         <h1 className="flex items-center text-xl font-medium m-0">
           <LayoutDashboard className="w-5 h-5" />
-          <span className="ml-2">Admin Settings</span>
+          <span className="ml-2">Admin Panel</span>
         </h1>
       </div>
       

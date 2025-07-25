@@ -1,4 +1,4 @@
-import { Settings, Palette, Key, KeySquare, MessageSquare, Image, Shield, Globe, Link, Wallet } from 'lucide-react';
+import { Settings, Palette, Key, KeySquare, MessageSquare, Image, Shield, Globe, Link, Wallet, Users as UsersIcon } from 'lucide-react';
 
 export interface Setting {
   key: string;
@@ -7,6 +7,7 @@ export interface Setting {
   type: 'boolean' | 'text' | 'textarea' | 'url' | 'number';
   defaultValue: boolean | string | number;
   placeholder?: string;
+  parentKey?: string; // optional dependency key
 }
 
 export interface SettingGroup {
@@ -18,6 +19,62 @@ export interface SettingGroup {
 }
 
 export const SETTING_GROUPS: SettingGroup[] = [
+  {
+    id: 'users',
+    title: 'Users',
+    description: 'Manage registered users',
+    icon: UsersIcon,
+    settings: [
+      {
+        key: 'balance.enabled',
+        label: 'Enable Token Balance System',
+        description: 'Turn on per-user token tracking and limits',
+        type: 'boolean',
+        defaultValue: false,
+      },
+      {
+        key: 'balance.startBalance',
+        label: 'Starting Balance',
+        description: 'Tokens each new account begins with',
+        type: 'number',
+        defaultValue: 0,
+        parentKey: 'balance.enabled',
+      },
+      {
+        key: 'balance.autoRefillEnabled',
+        label: 'Auto Refill',
+        description: 'Automatically top-up user tokens on an interval',
+        type: 'boolean',
+        defaultValue: false,
+        parentKey: 'balance.enabled',
+      },
+      {
+        key: 'balance.refillAmount',
+        label: 'Refill Amount',
+        description: 'Tokens added at each refill interval',
+        type: 'number',
+        defaultValue: 0,
+        parentKey: 'balance.autoRefillEnabled',
+      },
+      {
+        key: 'balance.refillIntervalValue',
+        label: 'Refill Interval – Value',
+        description: 'Numeric part of interval',
+        type: 'number',
+        defaultValue: 1,
+        parentKey: 'balance.autoRefillEnabled',
+      },
+      {
+        key: 'balance.refillIntervalUnit',
+        label: 'Refill Interval – Unit',
+        description: 'seconds, minutes, hours, days, weeks, months',
+        type: 'text',
+        defaultValue: 'days',
+        placeholder: 'hours',
+        parentKey: 'balance.autoRefillEnabled',
+      },
+    ],
+  },
   {
     id: 'interface',
     title: 'Interface & Experience',
@@ -60,13 +117,6 @@ export const SETTING_GROUPS: SettingGroup[] = [
         defaultValue: true 
       },
       { 
-        key: 'interface.memories', 
-        label: 'Memories', 
-        description: 'Enable AI memory functionality for personalized conversations',
-        type: 'boolean', 
-        defaultValue: true 
-      },
-      { 
         key: 'interface.bookmarks', 
         label: 'Message Bookmarks', 
         description: 'Allow users to bookmark important messages for later reference',
@@ -83,16 +133,93 @@ export const SETTING_GROUPS: SettingGroup[] = [
       { 
         key: 'interface.agents', 
         label: 'AI Agents', 
-        description: 'Advanced AI agents with specialized capabilities and tools',
+        description: 'Advanced AI agents with specialized capabilities and tools', 
         type: 'boolean', 
         defaultValue: true 
+      },
+      // ----- Agent endpoint nested settings -----
+      {
+        key: 'endpoints.agents.recursionLimit',
+        label: 'Default Recursion Limit',
+        description: 'Maximum steps per agent run (default)',
+        type: 'number',
+        defaultValue: 25,
+        parentKey: 'interface.agents',
+      },
+      {
+        key: 'endpoints.agents.maxRecursionLimit',
+        label: 'Max Recursion Limit',
+        description: 'Absolute upper limit of recursion steps users may set',
+        type: 'number',
+        defaultValue: 100,
+        parentKey: 'interface.agents',
+      },
+      {
+        key: 'endpoints.agents.allowedProviders',
+        label: 'Allowed Providers',
+        description: 'Comma-separated list of endpoint providers that agents may use',
+        type: 'text',
+        defaultValue: '',
+        placeholder: 'openAI, google',
+        parentKey: 'interface.agents',
+      },
+      {
+        key: 'endpoints.agents.capabilities',
+        label: 'Agent Capabilities',
+        description: 'Comma-separated capabilities to expose (execute_code, web_search, etc.)',
+        type: 'text',
+        defaultValue: '',
+        placeholder: 'execute_code, web_search, actions',
+        parentKey: 'interface.agents',
+      },
+      // ----- Memory toggle already exists; attach nested settings -----
+      { 
+        key: 'interface.memories', 
+        label: 'Memories', 
+        description: 'Enable AI memory functionality for personalized conversations', 
+        type: 'boolean', 
+        defaultValue: true 
+      },
+      {
+        key: 'memory.personalize',
+        label: 'Enable Personalization',
+        description: 'Allow users to access personalization tab when memory is enabled',
+        type: 'boolean',
+        defaultValue: true,
+        parentKey: 'interface.memories',
+      },
+      {
+        key: 'memory.tokenLimit',
+        label: 'Memory Token Limit',
+        description: 'Maximum total tokens allowed for stored memories',
+        type: 'number',
+        defaultValue: 10000,
+        parentKey: 'interface.memories',
+      },
+      {
+        key: 'memory.validKeys',
+        label: 'Valid Memory Keys',
+        description: 'Comma-separated list restricting keys that can be stored',
+        type: 'text',
+        defaultValue: 'preferences, work_info, personal_info, skills, interests, context',
+        placeholder: 'preferences, work_info',
+        parentKey: 'interface.memories',
+      },
+      {
+        key: 'memory.agent.id',
+        label: 'Memory Agent ID',
+        description: 'Existing agent ID to use for memory tasks (optional)',
+        type: 'text',
+        defaultValue: '',
+        placeholder: 'agent-id-here',
+        parentKey: 'interface.memories',
       },
     ],
   },
   {
     id: 'branding',
-    title: 'Site Branding & Content',
-    description: 'Customize your site branding and content',
+    title: 'Branding & Appearance',
+    description: 'Customize logos, images, texts and site branding',
     icon: Palette,
     settings: [
       { 
@@ -126,15 +253,7 @@ export const SETTING_GROUPS: SettingGroup[] = [
         type: 'textarea',
         defaultValue: '',
         placeholder: 'Enter custom footer content...'
-      }
-    ],
-  },
-  {
-    id: 'logoImages',
-    title: 'Logo & Images',
-    description: 'Customize logos, images, and brand colors',
-    icon: Image,
-    settings: [
+      },
       {
         key: 'logoUrl',
         label: 'Logo URL',
@@ -161,6 +280,38 @@ export const SETTING_GROUPS: SettingGroup[] = [
       }
     ],
   },
+  // New Authentication settings group
+  {
+    id: 'auth',
+    title: 'Authentication',
+    description: 'Login & registration related options',
+    icon: KeySquare,
+    settings: [
+      {
+        key: 'allowRegistration',
+        label: 'Allow User Registration',
+        description: 'Enable or disable new-account sign-ups on the login page',
+        type: 'boolean',
+        defaultValue: true,
+      },
+      {
+        key: 'registration.socialLogins',
+        label: 'Enabled Social Logins',
+        description: 'Comma-separated list (github, google, discord, etc.) that will be offered on the login page',
+        type: 'text',
+        defaultValue: 'github, google, discord',
+        placeholder: 'github, google, discord',
+      },
+      {
+        key: 'registration.allowedDomains',
+        label: 'Allowed Email Domains',
+        description: 'Restrict self-registration to these domains (comma-separated). Leave empty for no restriction',
+        type: 'text',
+        defaultValue: '',
+        placeholder: 'example.com, myorg.org',
+      },
+    ],
+  },
   {
     id: 'models',
     title: 'Model Access Control',
@@ -183,52 +334,6 @@ export const SETTING_GROUPS: SettingGroup[] = [
       }
     ],
   },
-  {
-    id: 'agents',
-    title: 'Agent Endpoint',
-    description: 'Configure agent capabilities and limits available to users',
-    icon: Shield,
-    settings: [
-      {
-        key: 'endpoints.agents.disableBuilder',
-        label: 'Disable Builder UI',
-        description: 'Hide the visual builder for creating agents',
-        type: 'boolean',
-        defaultValue: false,
-      },
-      {
-        key: 'endpoints.agents.recursionLimit',
-        label: 'Default Recursion Limit',
-        description: 'Maximum steps per agent run (default)',
-        type: 'number',
-        defaultValue: 25,
-      },
-      {
-        key: 'endpoints.agents.maxRecursionLimit',
-        label: 'Max Recursion Limit',
-        description: 'Absolute upper limit of recursion steps users may set',
-        type: 'number',
-        defaultValue: 100,
-      },
-      {
-        key: 'endpoints.agents.allowedProviders',
-        label: 'Allowed Providers',
-        description: 'Comma-separated list of endpoint providers that agents may use (e.g. openAI, google)',
-        type: 'text',
-        defaultValue: '',
-        placeholder: 'openAI, google',
-      },
-      {
-        key: 'endpoints.agents.capabilities',
-        label: 'Agent Capabilities',
-        description: 'Comma-separated capabilities to expose (execute_code, web_search, etc.)',
-        type: 'text',
-        defaultValue: '',
-        placeholder: 'execute_code, web_search, actions',
-      },
-    ],
-  },
-
   {
     id: 'sharing',
     title: 'Sharing & Links',
@@ -268,59 +373,6 @@ export const SETTING_GROUPS: SettingGroup[] = [
       },
     ],
   },
-
-  {
-    id: 'balance',
-    title: 'Token Balance',
-    description: 'Configure token usage limits and auto-refill',
-    icon: Wallet,
-    settings: [
-      {
-        key: 'balance.enabled',
-        label: 'Enable Balance System',
-        description: 'Track and restrict token usage per user',
-        type: 'boolean',
-        defaultValue: false,
-      },
-      {
-        key: 'balance.startBalance',
-        label: 'Starting Balance',
-        description: 'Tokens each new account begins with',
-        type: 'number',
-        defaultValue: 0,
-      },
-      {
-        key: 'balance.autoRefillEnabled',
-        label: 'Auto Refill',
-        description: 'Automatically top-up user tokens on an interval',
-        type: 'boolean',
-        defaultValue: false,
-      },
-      {
-        key: 'balance.refillIntervalValue',
-        label: 'Refill Interval – Value',
-        description: 'Numeric part of interval (e.g. 1, 24, 7)',
-        type: 'number',
-        defaultValue: 1,
-      },
-      {
-        key: 'balance.refillIntervalUnit',
-        label: 'Refill Interval – Unit',
-        description: 'seconds, minutes, hours, days, weeks, months',
-        type: 'text',
-        defaultValue: 'days',
-        placeholder: 'hours',
-      },
-      {
-        key: 'balance.refillAmount',
-        label: 'Refill Amount',
-        description: 'Tokens added each interval',
-        type: 'number',
-        defaultValue: 0,
-      },
-    ],
-  },
-
   // Update Conversations group (add retention + toggle)
   {
     id: 'conversations',
@@ -341,6 +393,22 @@ export const SETTING_GROUPS: SettingGroup[] = [
         description: 'How long temporary chats are kept before deletion (1-8760)',
         type: 'number',
         defaultValue: 720,
+      },
+    ],
+  },
+  {
+    id: 'customEndpoints',
+    title: 'Custom Endpoints',
+    description: 'Define additional endpoints in YAML/JSON format',
+    icon: Link,
+    settings: [
+      {
+        key: 'endpoints.custom',
+        label: 'Custom Endpoints YAML',
+        description: 'Paste YAML representing the custom endpoints array',
+        type: 'textarea',
+        defaultValue: '',
+        placeholder: '- name: "groq"\n  baseURL: "https://..."',
       },
     ],
   },

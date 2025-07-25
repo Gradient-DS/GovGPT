@@ -28,11 +28,21 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         {group.settings.map((setting) => {
+          const isNested = !!setting.parentKey;
+          if (isNested) {
+            const parentVal = values[setting.parentKey as string];
+            if (parentVal === false) {
+              return null;
+            }
+          }
           const current = values[setting.key] ?? setting.defaultValue;
+
+          const containerClass = isNested ? 'ml-4 pl-6 border-l border-gray-200 dark:border-gray-700' : '';
 
           if (setting.type === 'boolean') {
             return (
-              <SettingToggle
+              <div className={containerClass} key={setting.key}>
+                <SettingToggle
                 key={setting.key}
                 label={setting.label}
                 description={setting.description}
@@ -40,11 +50,13 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 disabled={saving}
                 onChange={(v) => onUpdateSetting(setting.key, v)}
               />
+              </div>
             );
           }
 
           if (['text', 'textarea', 'url', 'number'].includes(setting.type)) {
             return (
+              <div className={containerClass} key={setting.key}>
               <SettingText
                 key={setting.key}
                 label={setting.label}
@@ -62,6 +74,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                   )
                 }
               />
+              </div>
             );
           }
           return null;

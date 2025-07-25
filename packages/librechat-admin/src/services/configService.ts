@@ -57,6 +57,16 @@ export const ALLOW_LIST = [
   'balance.refillIntervalValue',
   'balance.refillIntervalUnit',
   'balance.refillAmount',
+  // Memory settings
+  'memory.disabled',
+  'memory.validKeys',
+  'memory.tokenLimit',
+  'memory.personalize',
+  'memory.agent.id',
+  // Custom endpoints
+  'endpoints.custom',
+  // Auth registration toggle
+  'auth.allowRegistration',
 ];
 export const OVERLAY_PATH = process.env.ADMIN_OVERLAY_PATH || path.resolve(process.cwd(), 'admin-overrides.yaml');
 const FLAG_PATH = path.resolve(process.cwd(), 'restart.flag');
@@ -109,6 +119,7 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
     'balance.startBalance',
     'balance.refillIntervalValue',
     'balance.refillAmount',
+    'memory.tokenLimit',
   ]);
 
   const arrayKeys = new Set([
@@ -117,6 +128,7 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
     'actions.allowedDomains',
     'registration.socialLogins',
     'registration.allowedDomains',
+    'memory.validKeys',
   ]);
 
   let coercedValue: unknown = value;

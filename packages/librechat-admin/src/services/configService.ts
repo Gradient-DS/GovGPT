@@ -33,7 +33,6 @@ export const ALLOW_LIST = [
   'interface.webSearch',
   'interface.runCode',
   // Registration arrays (not booleans)
-  'registration.socialLogins',
   'registration.allowedDomains',
   // Conversation settings
   'interface.temporaryChat',
@@ -67,6 +66,17 @@ export const ALLOW_LIST = [
   'endpoints.custom',
   // Auth registration toggle
   'auth.allowRegistration',
+  
+  // Registration (LibreChat native)
+  'registration.socialLogins',
+  'registration.allowedDomains',
+  
+  // Social Provider Toggles (auto-generates registration.socialLogins)
+  'auth.googleEnabled',
+  'auth.githubEnabled', 
+  'auth.microsoftEnabled',
+  'auth.discordEnabled',
+  'auth.facebookEnabled',
 ];
 export const OVERLAY_PATH = process.env.ADMIN_OVERLAY_PATH || path.resolve(process.cwd(), 'admin-overrides.yaml');
 const FLAG_PATH = path.resolve(process.cwd(), 'restart.flag');
@@ -120,6 +130,9 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
     'balance.refillIntervalValue',
     'balance.refillAmount',
     'memory.tokenLimit',
+    // Web Search numeric settings
+    'webSearch.safeSearch',
+    'webSearch.scraperTimeout',
   ]);
 
   const arrayKeys = new Set([
@@ -153,18 +166,66 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
   await doc.save();
   console.log('[GovGPT] Updated override in MongoDB:', key, '=', value);
 
+  // Auto-generate registration.socialLogins if any auth provider keys were modified
+  if (key.startsWith('auth.') && key.endsWith('Enabled')) {
+    autoGenerateSocialLogins(doc);
+    await doc.save();
+  }
+
   await writeOverlayYaml(doc.overrides);
-  await generateMergedYaml({ overrides: doc.overrides });
+  
+  // Filter out auth fields for LibreChat merged config too
+  const cleanOverrides = _.cloneDeep(doc.overrides);
+  delete cleanOverrides.auth;
+  await generateMergedYaml({ overrides: cleanOverrides });
   console.log('[GovGPT] Configuration updated and applied successfully');
 
   return doc.overrides;
 }
 
+/**
+ * Automatically generates the registration.socialLogins array based on enabled provider toggles
+ */
+function autoGenerateSocialLogins(doc: any): void {
+  const enabledProviders: string[] = [];
+  
+  // Check each auth provider toggle and add to the list if enabled
+  const auth = doc.overrides.auth || {};
+  
+  if (auth.googleEnabled) {
+    enabledProviders.push('google');
+  }
+  if (auth.githubEnabled) {
+    enabledProviders.push('github');
+  }
+  if (auth.microsoftEnabled) {
+    enabledProviders.push('openid'); // Microsoft/Azure AD uses OpenID Connect
+  }
+  if (auth.discordEnabled) {
+    enabledProviders.push('discord');
+  }
+  if (auth.facebookEnabled) {
+    enabledProviders.push('facebook');
+  }
+
+  // Set the auto-generated list for LibreChat (matches example format)
+  _.set(doc.overrides, 'registration.socialLogins', enabledProviders);
+  doc.markModified('overrides');
+  
+  console.log('[GovGPT] Auto-generated registration.socialLogins for LibreChat:', enabledProviders);
+}
+
+
 function writeOverlayYaml(overrides: Record<string, unknown>): Promise<void> {
   return new Promise((resolve, reject) => {
-    const yamlStr = yaml.dump(overrides, { lineWidth: 120 });
+    // Filter out auth.* fields from YAML output - these are only for admin panel control
+    const cleanOverrides = _.cloneDeep(overrides);
+    delete cleanOverrides.auth; // Remove entire auth section
+    
+    const yamlStr = yaml.dump(cleanOverrides, { lineWidth: 120 });
     fs.writeFile(OVERLAY_PATH, yamlStr, 'utf8', (err) => {
       if (err) return reject(err);
+      console.log('[GovGPT] YAML written (auth fields filtered out)');
       resolve();
     });
   });

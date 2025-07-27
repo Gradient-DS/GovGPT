@@ -17,6 +17,7 @@ COPY packages/data-provider/package*.json ./packages/data-provider/
 COPY packages/api/package*.json ./packages/api/
 COPY packages/data-schemas/package*.json ./packages/data-schemas/
 COPY packages/librechat-admin/package*.json ./packages/librechat-admin/
+COPY packages/custom/package*.json ./packages/custom/
 COPY admin-frontend/package*.json ./admin-frontend/
 COPY client/package*.json ./client/
 COPY api/package*.json ./api/

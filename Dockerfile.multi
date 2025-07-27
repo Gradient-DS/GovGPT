@@ -59,6 +59,8 @@ RUN npm run build
 # Build admin frontend
 FROM base AS admin-frontend-build
 WORKDIR /app/admin-frontend
+COPY admin-frontend/package*.json ./
+RUN npm ci
 COPY admin-frontend ./
 RUN npm run build
 

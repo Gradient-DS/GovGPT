@@ -6,9 +6,10 @@
 const path = require('path');
 
 module.exports = (app) => {
-  // Resolve core JWT auth middleware once
+  // Resolve the core auth middleware relative to the current working directory
+  // Works when cwd is project root (development) or /app/api (production container)
   const requireJwtAuth = require(
-    path.join(process.cwd(), 'api', 'server', 'middleware', 'requireJwtAuth'),
+    path.join(process.cwd(), 'server', 'middleware', 'requireJwtAuth'),
   );
 
   const modules = [

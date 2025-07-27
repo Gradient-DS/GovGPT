@@ -212,23 +212,32 @@ export function buildAdminRouter(
     }
   });
 
-  // Locate the admin-frontend/dist folder from the project root, regardless of where this file lives
-  const distPath = path.resolve(process.cwd(), 'admin-frontend', 'dist');
-  
-  if (fs.existsSync(distPath)) {
+  // Locate the admin-frontend/dist folder from either project root or api workdir
+  const candidatePaths: string[] = [
+    path.resolve(process.cwd(), 'admin-frontend', 'dist'),
+    path.resolve(process.cwd(), '..', 'admin-frontend', 'dist'),
+  ];
+
+  const distPath = candidatePaths.find((p) => fs.existsSync(p));
+
+  console.log('Admin frontend dist candidates:', candidatePaths);
+  console.log('Selected dist path:', distPath);
+
+  if (distPath) {
     // Serve static assets (these will be protected by the middleware above)
     router.use('/', express.static(distPath));
-    
+
     // Handle HTML requests - if we reach here, authentication passed
     router.get('*', (req, res, next) => {
       const isHtmlRequest = req.headers.accept && req.headers.accept.includes('text/html');
-      
       if (isHtmlRequest) {
         res.sendFile(path.join(distPath, 'index.html'));
       } else {
         next();
       }
     });
+  } else {
+    console.warn('WARNING: Admin frontend dist folder not found!');
   }
 
   return router;

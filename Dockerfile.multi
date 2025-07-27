@@ -25,6 +25,8 @@ COPY api/package*.json ./api/
 # Install all dependencies for every build
 FROM base-min AS base
 WORKDIR /app
+# Copy custom package source early since it's needed for workspace validation
+COPY packages/custom ./packages/custom
 RUN npm ci
 
 # Build `data-provider` package
@@ -56,11 +58,6 @@ COPY --from=data-provider-build /app/packages/data-provider/dist /app/packages/d
 COPY --from=data-schemas-build /app/packages/data-schemas/dist /app/packages/data-schemas/dist
 RUN npm run build
 
-# Copy custom package (no build needed, just make available)
-FROM base AS custom-package-build
-WORKDIR /app/packages/custom
-COPY packages/custom ./
-
 # Build admin frontend
 FROM base AS admin-frontend-build
 WORKDIR /app/admin-frontend
@@ -85,7 +82,7 @@ WORKDIR /app
 RUN npm ci --omit=dev
 COPY api ./api
 COPY config ./config
-COPY --from=custom-package-build /app/packages/custom ./packages/custom
+COPY --from=base /app/packages/custom ./packages/custom
 COPY --from=data-provider-build /app/packages/data-provider/dist ./packages/data-provider/dist
 COPY --from=data-schemas-build /app/packages/data-schemas/dist ./packages/data-schemas/dist
 COPY --from=api-package-build /app/packages/api/dist ./packages/api/dist

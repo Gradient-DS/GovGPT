@@ -83,13 +83,11 @@ const FLAG_PATH = path.resolve(process.cwd(), 'restart.flag');
 
 async function ensureDbConnection(): Promise<void> {
   if (mongoose.connection.readyState === 1) return;
-  console.log('[GovGPT] Waiting for LibreChat MongoDB connection...');
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error('MongoDB connection timeout')), 10000);
     const check = (): void => {
       if (mongoose.connection.readyState === 1) {
         clearTimeout(timeout);
-        console.log('[GovGPT] Using LibreChat MongoDB connection');
         resolve();
       } else {
         setTimeout(check, 100);
@@ -164,8 +162,6 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
   doc.updatedAt = new Date();
 
   await doc.save();
-  console.log('[GovGPT] Updated override in MongoDB:', key, '=', value);
-
   // Auto-generate registration.socialLogins if any auth provider keys were modified
   if (key.startsWith('auth.') && key.endsWith('Enabled')) {
     autoGenerateSocialLogins(doc);
@@ -178,7 +174,6 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
   const cleanOverrides = _.cloneDeep(doc.overrides);
   delete cleanOverrides.auth;
   await generateMergedYaml({ overrides: cleanOverrides });
-  console.log('[GovGPT] Configuration updated and applied successfully');
 
   return doc.overrides;
 }
@@ -212,7 +207,6 @@ function autoGenerateSocialLogins(doc: any): void {
   _.set(doc.overrides, 'registration.socialLogins', enabledProviders);
   doc.markModified('overrides');
   
-  console.log('[GovGPT] Auto-generated registration.socialLogins for LibreChat:', enabledProviders);
 }
 
 
@@ -225,7 +219,6 @@ function writeOverlayYaml(overrides: Record<string, unknown>): Promise<void> {
     const yamlStr = yaml.dump(cleanOverrides, { lineWidth: 120 });
     fs.writeFile(OVERLAY_PATH, yamlStr, 'utf8', (err) => {
       if (err) return reject(err);
-      console.log('[GovGPT] YAML written (auth fields filtered out)');
       resolve();
     });
   });
@@ -233,5 +226,4 @@ function writeOverlayYaml(overrides: Record<string, unknown>): Promise<void> {
 
 export async function applyChanges(): Promise<void> {
   fs.writeFileSync(FLAG_PATH, Date.now().toString());
-  console.log('[GovGPT] Restart flag written');
 } 

@@ -280,13 +280,13 @@ export const SETTING_GROUPS: SettingGroup[] = [
       }
     ],
   },
-  // New Authentication settings group
   {
-    id: 'auth',
-    title: 'Authentication',
-    description: 'Login & registration related options',
-    icon: KeySquare,
+    id: 'authentication',
+    title: 'Authentication & Social Providers', 
+    description: 'Configure login, registration, and social authentication providers',
+    icon: Shield,
     settings: [
+      // General Authentication Settings
       {
         key: 'allowRegistration',
         label: 'Allow User Registration',
@@ -295,20 +295,49 @@ export const SETTING_GROUPS: SettingGroup[] = [
         defaultValue: true,
       },
       {
-        key: 'registration.socialLogins',
-        label: 'Enabled Social Logins',
-        description: 'Comma-separated list (github, google, discord, etc.) that will be offered on the login page',
-        type: 'text',
-        defaultValue: 'github, google, discord',
-        placeholder: 'github, google, discord',
-      },
-      {
         key: 'registration.allowedDomains',
         label: 'Allowed Email Domains',
         description: 'Restrict self-registration to these domains (comma-separated). Leave empty for no restriction',
         type: 'text',
         defaultValue: '',
         placeholder: 'example.com, myorg.org',
+      },
+      
+      // Individual Social Provider Toggles (auto-generates registration.socialLogins)
+      {
+        key: 'auth.googleEnabled',
+        label: 'Enable Google Login',
+        description: 'Allow users to sign in with Google',
+        type: 'boolean',
+        defaultValue: false,
+      },
+      {
+        key: 'auth.githubEnabled',
+        label: 'Enable GitHub Login',
+        description: 'Allow users to sign in with GitHub',
+        type: 'boolean',
+        defaultValue: false,
+      },
+      {
+        key: 'auth.microsoftEnabled',
+        label: 'Enable Microsoft/Azure AD Login',
+        description: 'Allow users to sign in with Microsoft/Azure AD',
+        type: 'boolean',
+        defaultValue: false,
+      },
+      {
+        key: 'auth.discordEnabled',
+        label: 'Enable Discord Login',
+        description: 'Allow users to sign in with Discord',
+        type: 'boolean',
+        defaultValue: false,
+      },
+      {
+        key: 'auth.facebookEnabled',
+        label: 'Enable Facebook Login',
+        description: 'Allow users to sign in with Facebook',
+        type: 'boolean',
+        defaultValue: false,
       },
     ],
   },

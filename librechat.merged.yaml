@@ -80,23 +80,14 @@ interface:
       By using the Website, you acknowledge that you have read these Terms of Service and agree to be bound by them.
   endpointsMenu: true
   modelSelect: true
-  parameters: true
+  parameters: false
   sidePanel: true
-  presets: true
+  presets: false
   prompts: true
   bookmarks: true
   multiConvo: true
-  agents: true
-  memories: true
-registration:
-  socialLogins:
-    - github
-    - google
-    - discord
-    - openid
-    - facebook
-    - apple
-    - saml
+  agents: false
+  memories: false
 actions:
   allowedDomains:
     - swapi.dev
@@ -124,10 +115,8 @@ endpoints:
       iconURL: >-
         https://scaleway.com/cdn-cgi/image/width=384/https://www-mkt-uploads.s3.fr-par.scw.cloud/2016838564eb_Logo_2_png_969dd089d4.png
       modelDisplayLabel: UbiOps
-balance:
-  enabled: true
-  autoRefillEnabled: true
-  startBalance: 30000
-  refillAmount: 20000
-  refillIntervalUnit: months
-  refillIntervalValue: 1
+registration:
+  socialLogins:
+    - google
+memory:
+  personalize: false

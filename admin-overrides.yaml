@@ -1,12 +1,13 @@
-balance:
-  enabled: true
-  autoRefillEnabled: true
-  startBalance: 30000
-  refillAmount: 20000
-  refillIntervalUnit: months
-  refillIntervalValue: 1
+registration:
+  socialLogins:
+    - google
 interface:
-  multiConvo: true
+  modelSelect: true
+  parameters: false
   sidePanel: true
-  memories: true
-  agents: true
+  presets: false
+  prompts: true
+  agents: false
+  memories: false
+memory:
+  personalize: false

@@ -59,8 +59,9 @@ RUN npm run build
 # Build admin frontend
 FROM base AS admin-frontend-build
 WORKDIR /app/admin-frontend
-COPY admin-frontend/package*.json ./
-RUN npm ci
+# Copy only package.json to avoid lockfile mismatch, then install deps
+COPY admin-frontend/package.json ./
+RUN npm install
 COPY admin-frontend ./
 RUN npm run build
 

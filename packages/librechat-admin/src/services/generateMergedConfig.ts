@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import AdminConfig from '../models/AdminConfig';
 
 // Resolve project root based on this file location (../../.. from src/services)
-const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 
 const BASE_PATH = process.env.BASE_CONFIG_PATH || path.join(PROJECT_ROOT, 'librechat.yaml');
 const MERGED_PATH = path.join(PROJECT_ROOT, 'librechat.merged.yaml');

@@ -53,4 +53,27 @@ module.exports = (app) => {
       }
     }
   });
+
+  /*
+   * Admin-only endpoint to restart the backend.
+   * Sends 200 first, then exits the process so Docker will auto-restart the container.
+   */
+  const adminMiddlewarePath = path.join(
+    __dirname,
+    '..',
+    '..',
+    'api',
+    'server',
+    'middleware',
+    'roles',
+    'admin',
+  );
+  const checkAdmin = require(adminMiddlewarePath);
+
+  app.post('/api/restart', requireJwtAuth, checkAdmin, (req, res) => {
+    res.status(200).json({ message: 'Restarting server...' });
+    // Allow response to flush before exiting.
+    setTimeout(() => process.exit(0), 100);
+  });
+  console.info('[Custom] Restart endpoint mounted at /api/restart');
 }; 

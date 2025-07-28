@@ -23,7 +23,6 @@ interface UseAdminConfig {
  *
  * GET  /admin/config          → fetch overrides
  * POST /admin/config          → { key, value }  (update single path)
- * POST /admin/config/apply    → regenerate merged YAML + restart flag
  */
 export function useAdminConfig(): UseAdminConfig {
   const [overrides, setOverrides] = useState<Overrides>();
@@ -180,7 +179,7 @@ export function useAdminConfig(): UseAdminConfig {
       const res = await fetch(url, {
         method: 'POST',
         headers,
-        credentials: 'include', // Important: include cookies for authentication
+        credentials: 'include',
         body,
       });
       
@@ -203,30 +202,25 @@ export function useAdminConfig(): UseAdminConfig {
   }, [getAuthHeaders]);
 
   const applyChanges = useCallback(async () => {
-    console.log('\n=== APPLYING CHANGES ===');
+    console.log('\n=== APPLYING CHANGES & RESTART ===');
     setSaving(true);
     try {
-      const url = '/admin/config/apply';
       const headers = getAuthHeaders();
-      
-      console.log('Making POST request to:', url);
-      console.log('With headers:', headers);
-      
-      const res = await fetch(url, { 
+
+      const restartUrl = '/api/restart';
+      console.log('Triggering backend restart via:', restartUrl);
+      await fetch(restartUrl, {
         method: 'POST',
         headers,
-        credentials: 'include', // Important: include cookies for authentication
+        credentials: 'include',
       });
-      
-      console.log('POST completed, handling response...');
-      await handleResponse(res);
-      console.log('Apply changes successful');
+      console.log('Restart request sent');
     } catch (err) {
-      console.log('Apply changes error:', err);
-      throw err;
+      // Fetch may fail due to the server shutting down; safely ignore.
+      console.warn('Restart request error (expected if server is restarting):', err);
     } finally {
       setSaving(false);
-      console.log('Apply changes completed');
+      console.log('Restart process initiated');
     }
   }, [getAuthHeaders]);
 

@@ -1,5 +1,5 @@
 import express, { Router, Request, Response, NextFunction } from 'express';
-import { getOverrides, updateOverride, applyChanges } from '../services/configService';
+import { getOverrides, updateOverride } from '../services/configService';
 import path from 'path';
 import fs from 'fs';
 
@@ -93,15 +93,6 @@ export function buildAdminRouter(
       res.json({ overrides });
     } catch (err: any) {
       res.status(err.status || 500).json({ message: err.message });
-    }
-  });
-
-  router.post('/config/apply', async (_req, res) => {
-    try {
-      await applyChanges();
-      res.json({ message: 'Restart flag written' });
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
     }
   });
 

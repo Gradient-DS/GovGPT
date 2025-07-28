@@ -1,15 +1,15 @@
-version: "3.9"
-
 services:
   librechat_api:
     build:
       context: .
-      dockerfile: Dockerfile.multi
+      dockerfile: Dockerfile.GovGPT.multi
       target: api-build
     container_name: librechat_api_local
     restart: unless-stopped
     environment:
       CONFIG_PATH: /app/librechat.merged.yaml
+      BASE_CONFIG_PATH: /app/librechat.yaml
+      ADMIN_OVERLAY_PATH: /app/admin-overrides.yaml
       HOST: 0.0.0.0
       PORT: 3080
       MONGO_URI: mongodb://mongodb:27017/LibreChat
@@ -21,9 +21,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./librechat.merged.yaml:/app/librechat.merged.yaml:ro
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      - ./librechat.merged.yaml:/app/librechat.merged.yaml:rw
       - ./admin-overrides.yaml:/app/admin-overrides.yaml:rw
-      - ./restart.flag:/app/restart.flag:rw
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
     ports:
@@ -70,33 +70,6 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     env_file:
       - .env
-
-  restart_watcher:
-    image: docker:cli
-    container_name: govgpt_restart_watcher_local
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./restart.flag:/watch/restart.flag:ro
-    command: |
-      sh -c '
-        echo "🔄 GovGPT Restart Watcher started..."
-        LAST_MODIFIED=""
-        while true; do
-          if [ -f /watch/restart.flag ]; then
-            CURRENT_MODIFIED=$$(stat -c %Y /watch/restart.flag 2>/dev/null || echo "0")
-            if [ "$$CURRENT_MODIFIED" != "$$LAST_MODIFIED" ] && [ "$$CURRENT_MODIFIED" != "0" ]; then
-              echo "🔄 Restart flag detected, restarting librechat_api..."
-              docker restart librechat_api
-              LAST_MODIFIED=$$CURRENT_MODIFIED
-              echo "✅ Container restarted successfully"
-            fi
-          fi
-          sleep 5
-        done
-      '
-    depends_on:
-      - librechat_api
 
 volumes:
   pgdata2: 

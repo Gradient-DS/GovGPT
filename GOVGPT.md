@@ -109,3 +109,28 @@ GovGPT/
 ├── librechat.yaml          # Base runtime config
 └── GOVGPT.md               # This quick-start guide
 ```
+
+### Why three “admin” pieces?
+
+1. **packages/custom/** – tiny entry-point loaded from `api/server/index.js`.
+   It receives the Express `app` instance and mounts any custom routers
+   (currently the admin router) at runtime. Keeping this in a separate
+   workspace lets us inject routes without touching core LibreChat code.
+
+2. **packages/librechat-admin/** – an independent NPM workspace that
+   exposes `buildAdminRouter(requireJwtAuth)`; it contains all backend
+   logic (override settings, user management, etc.).  When `custom/mount.js`
+   runs, it `require`s this package and attaches the router at `/admin`.
+
+3. **admin-frontend/** – a standalone React frontend compiled to static
+   assets that headless-loads inside the `/admin` routes served by the
+   router above.  Building it separately keeps the admin UI dependencies
+   out of the main client bundle.
+
+At runtime the sequence is:
+
+1. core `api/server/index.js` → `require('custom').mount(app)`
+2. `packages/custom/mount.js` locates `requireJwtAuth`, builds the admin
+   router from `packages/librechat-admin`, and mounts it.
+3. Requests to `/admin/*` are now handled by the router and serve the
+   admin React bundle.

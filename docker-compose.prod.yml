@@ -7,6 +7,7 @@ services:
       - "govgpt.restart=enabled"
     environment:
       CONFIG_PATH: /app/librechat.merged.yaml
+      BASE_CONFIG_PATH: /app/librechat.yaml
       HOST: 0.0.0.0
       PORT: 3080
       MONGO_URI: mongodb://mongodb:27017/LibreChat
@@ -18,8 +19,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./librechat.merged.yaml:/app/librechat.merged.yaml:ro
-      - ./admin-overrides.yaml:/app/admin-overrides.yaml:rw  # Admin can write to this
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      - ./librechat.merged.yaml:/app/librechat.merged.yaml:rw
+      - ./admin-overrides.yaml:/app/admin-overrides.yaml:rw
       - ./uploads:/app/uploads
       - ./logs:/app/api/logs
     ports:

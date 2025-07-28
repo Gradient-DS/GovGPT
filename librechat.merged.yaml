@@ -1,7 +1,7 @@
 version: 1.2.1
 cache: true
 interface:
-  customWelcome: Welcome to LibreChat! Enjoy your experience.
+  customWelcome: Welkom bij GovGPT!
   mcpServers:
     placeholder: MCP Servers
   privacyPolicy:
@@ -80,9 +80,9 @@ interface:
       By using the Website, you acknowledge that you have read these Terms of Service and agree to be bound by them.
   endpointsMenu: true
   modelSelect: true
-  parameters: false
+  parameters: true
   sidePanel: true
-  presets: false
+  presets: true
   prompts: true
   bookmarks: true
   multiConvo: true
@@ -120,3 +120,6 @@ registration:
     - google
 memory:
   personalize: false
+balance:
+  enabled: true
+  autoRefillEnabled: false

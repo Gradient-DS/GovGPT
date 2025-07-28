@@ -65,14 +65,14 @@ const UserModal: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
                   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
                   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-                  await fetch(`/api/admin/users/${user._id}`, {
+                  await fetch(`/admin/users/${user._id}`, {
                     method: 'PUT',
                     headers,
                     credentials: 'include',
                     body: JSON.stringify({ role }),
                   });
 
-                  await fetch(`/api/admin/users/${user._id}/balance`, {
+                  await fetch(`/admin/users/${user._id}/balance`, {
                     method: 'PUT',
                     headers,
                     credentials: 'include',
@@ -138,7 +138,7 @@ const UserModal: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
                       const token = refreshJson?.token;
                       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
                       if (token) headers['Authorization'] = `Bearer ${token}`;
-                      await fetch(`/api/admin/users/${user._id}`, { method: 'DELETE', headers, credentials: 'include' });
+                      await fetch(`/admin/users/${user._id}`, { method: 'DELETE', headers, credentials: 'include' });
                       onUpdated();
                     } catch (err) {
                       setSaveError((err as Error).message);

@@ -21,9 +21,9 @@ interface UseAdminConfig {
 /**
  * React hook for interacting with the GovGPT Admin plugin config endpoints.
  *
- * GET  /api/admin/config          → fetch overrides
- * POST /api/admin/config          → { key, value }  (update single path)
- * POST /api/admin/config/apply    → regenerate merged YAML + restart flag
+ * GET  /admin/config          → fetch overrides
+ * POST /admin/config          → { key, value }  (update single path)
+ * POST /admin/config/apply    → regenerate merged YAML + restart flag
  */
 export function useAdminConfig(): UseAdminConfig {
   const [overrides, setOverrides] = useState<Overrides>();
@@ -129,7 +129,7 @@ export function useAdminConfig(): UseAdminConfig {
       setIsAuthError(false);
       
       try {
-        const url = '/api/admin/config';
+        const url = '/admin/config';
         const headers = getAuthHeaders();
         
         console.log('Making fetch request to:', url);
@@ -169,7 +169,7 @@ export function useAdminConfig(): UseAdminConfig {
     
     setSaving(true);
     try {
-      const url = '/api/admin/config';
+      const url = '/admin/config';
       const headers = getAuthHeaders();
       const body = JSON.stringify({ key, value });
       
@@ -206,7 +206,7 @@ export function useAdminConfig(): UseAdminConfig {
     console.log('\n=== APPLYING CHANGES ===');
     setSaving(true);
     try {
-      const url = '/api/admin/config/apply';
+      const url = '/admin/config/apply';
       const headers = getAuthHeaders();
       
       console.log('Making POST request to:', url);

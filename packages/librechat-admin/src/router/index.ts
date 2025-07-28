@@ -14,14 +14,14 @@ export function buildAdminRouter(
 ): Router {
   const router = express.Router();
 
+  // DEBUG: trace all requests that reach the admin router
+  router.use((req, _res, next) => {
+    console.debug('[ADMIN] inside router:', req.method, req.path);
+    next();
+  });
+
   // Importing enums/constants that are safe to resolve directly
   const { SystemRoles } = require('librechat-data-provider');
-
-  // Debug middleware for LibreChat JWT auth issues
-  const debugMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    next();
-  };
-
 
   const protectedPaths = ['/health', '/config*', '/users*'];
 
@@ -212,18 +212,17 @@ export function buildAdminRouter(
     }
   });
 
-  // Locate the admin-frontend/dist folder from either project root or api workdir
-  const candidatePaths: string[] = [
-    path.resolve(process.cwd(), 'admin-frontend', 'dist'),
-    path.resolve(process.cwd(), '..', 'admin-frontend', 'dist'),
-  ];
+  // Compute dist path relative to project root (works in dev & container)
+  const distPath = path.join(path.resolve(__dirname, '..', '..', '..', '..'), 'admin-frontend', 'dist');
 
-  const distPath = candidatePaths.find((p) => fs.existsSync(p));
+  console.log('Admin frontend dist path:', distPath);
 
-  console.log('Admin frontend dist candidates:', candidatePaths);
-  console.log('Selected dist path:', distPath);
+  // Serve React index for the base paths before static middleware
+  router.get(['', '/'], (_req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
 
-  if (distPath) {
+  if (fs.existsSync(distPath)) {
     // Serve static assets (these will be protected by the middleware above)
     router.use('/', express.static(distPath));
 

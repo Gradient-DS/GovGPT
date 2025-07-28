@@ -6,24 +6,26 @@
 const path = require('path');
 
 module.exports = (app) => {
-  // Resolve the core auth middleware relative to the current working directory
-  // Works when cwd is project root (development) or /app/api (production container)
   const requireJwtAuth = require(
-    path.join(process.cwd(), 'server', 'middleware', 'requireJwtAuth'),
+    path.join(__dirname, '..', '..', 'api', 'server', 'middleware', 'requireJwtAuth')
   );
+
+  if (!requireJwtAuth) {
+    throw new Error('requireJwtAuth middleware not found in expected locations');
+  }
 
   const modules = [
     {
       name: 'Admin',
       // Point directly to the compiled router factory
       path: path.resolve(__dirname, '..', 'librechat-admin', 'dist', 'router'),
-      route: '/api/admin',
+      route: '/admin',
     },
     // Future modules can be added here:
     // {
     //   name: 'Analytics',
     //   path: path.resolve(__dirname, '..', 'analytics', 'dist', 'router'),
-    //   route: '/api/analytics',
+    //   route: '/analytics',
     // },
   ];
 

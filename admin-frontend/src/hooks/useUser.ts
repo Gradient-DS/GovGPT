@@ -34,8 +34,8 @@ export function useUser(userId: string | null) {
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
         const [userRes, balRes] = await Promise.all([
-          fetch(`/api/admin/users/${userId}`, { headers, credentials: 'include' }),
-          fetch(`/api/admin/users/${userId}/balance`, { headers, credentials: 'include' }),
+          fetch(`/admin/users/${userId}`, { headers, credentials: 'include' }),
+          fetch(`/admin/users/${userId}/balance`, { headers, credentials: 'include' }),
         ]);
         if (!userRes.ok) throw new Error(`User fetch failed (${userRes.status})`);
         const userJson = await userRes.json();

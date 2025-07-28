@@ -78,8 +78,30 @@ export const ALLOW_LIST = [
   'auth.discordEnabled',
   'auth.facebookEnabled',
 ];
-export const OVERLAY_PATH = process.env.ADMIN_OVERLAY_PATH || path.resolve(process.cwd(), 'admin-overrides.yaml');
-const FLAG_PATH = path.resolve(process.cwd(), 'restart.flag');
+// Determine repository root (../../.. from src/services)
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
+
+export const OVERLAY_PATH = process.env.ADMIN_OVERLAY_PATH || path.join(PROJECT_ROOT, 'admin-overrides.yaml');
+
+export const FLAG_PATHS: string[] = [
+  // Explicit env override
+  ...(process.env.ADMIN_FLAG_PATH ? [process.env.ADMIN_FLAG_PATH] : []),
+  // Root-level flag (used by restart_watcher)
+  path.join(PROJECT_ROOT, 'restart.flag'),
+  // Fallback inside api directory (dev runs)
+  path.join(PROJECT_ROOT, 'api', 'restart.flag'),
+];
+
+function touchFlag(): void {
+  const payload = Date.now().toString();
+  FLAG_PATHS.forEach((p) => {
+    try {
+      fs.writeFileSync(p, payload);
+    } catch (err) {
+      // Ignore paths that cannot be written (not mounted)
+    }
+  });
+}
 
 async function ensureDbConnection(): Promise<void> {
   if (mongoose.connection.readyState === 1) return;
@@ -225,5 +247,5 @@ function writeOverlayYaml(overrides: Record<string, unknown>): Promise<void> {
 }
 
 export async function applyChanges(): Promise<void> {
-  fs.writeFileSync(FLAG_PATH, Date.now().toString());
+  touchFlag();
 } 

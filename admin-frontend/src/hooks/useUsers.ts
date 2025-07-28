@@ -47,7 +47,7 @@ export function useUsers() {
       query.append('limit', limit.toString());
       if (search) query.append('search', search);
 
-      const res = await fetch(`/api/admin/users?${query.toString()}`, {
+      const res = await fetch(`/admin/users?${query.toString()}`, {
         headers,
         credentials: 'include',
       });

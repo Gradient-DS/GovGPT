@@ -22,7 +22,7 @@ export function useUserStats() {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/admin/users/stats', { headers, credentials: 'include' });
+      const res = await fetch('/admin/users/stats', { headers, credentials: 'include' });
       if (!res.ok) throw new Error(`Failed to load stats (${res.status})`);
       setStats(await res.json());
     } catch (err) {

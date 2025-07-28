@@ -71,5 +71,32 @@ services:
     env_file:
       - .env
 
+  restart_watcher:
+    image: docker:cli
+    container_name: govgpt_restart_watcher_local
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./restart.flag:/watch/restart.flag:ro
+    command: |
+      sh -c '
+        echo "🔄 GovGPT Restart Watcher started..."
+        LAST_MODIFIED=""
+        while true; do
+          if [ -f /watch/restart.flag ]; then
+            CURRENT_MODIFIED=$$(stat -c %Y /watch/restart.flag 2>/dev/null || echo "0")
+            if [ "$$CURRENT_MODIFIED" != "$$LAST_MODIFIED" ] && [ "$$CURRENT_MODIFIED" != "0" ]; then
+              echo "🔄 Restart flag detected, restarting librechat_api..."
+              docker restart librechat_api
+              LAST_MODIFIED=$$CURRENT_MODIFIED
+              echo "✅ Container restarted successfully"
+            fi
+          fi
+          sleep 5
+        done
+      '
+    depends_on:
+      - librechat_api
+
 volumes:
   pgdata2: 

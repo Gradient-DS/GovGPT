@@ -3,11 +3,16 @@ registration:
     - google
 interface:
   modelSelect: true
-  parameters: false
+  parameters: true
   sidePanel: true
-  presets: false
+  presets: true
   prompts: true
   agents: false
   memories: false
+  bookmarks: true
+  customWelcome: Welkom bij GovGPT!
 memory:
   personalize: false
+balance:
+  enabled: true
+  autoRefillEnabled: false

@@ -30,7 +30,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const res = await fetch('/api/admin/users', {
+      const res = await fetch('/admin/users', {
         method: 'POST',
         headers,
         credentials: 'include',
@@ -42,7 +42,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
 
       // If credits were specified, set them via balance endpoint
       if (created?._id && tokenCredits > 0) {
-        await fetch(`/api/admin/users/${created._id}/balance`, {
+        await fetch(`/admin/users/${created._id}/balance`, {
           method: 'PUT',
           headers,
           credentials: 'include',

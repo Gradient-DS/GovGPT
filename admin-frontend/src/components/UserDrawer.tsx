@@ -66,7 +66,7 @@ const UserDrawer: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
                     if (token) headers['Authorization'] = `Bearer ${token}`;
 
                     // update role
-                    await fetch(`/api/admin/users/${user._id}`, {
+                    await fetch(`/admin/users/${user._id}`, {
                       method: 'PUT',
                       headers,
                       credentials: 'include',
@@ -74,7 +74,7 @@ const UserDrawer: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
                     });
 
                     // update balance
-                    await fetch(`/api/admin/users/${user._id}/balance`, {
+                    await fetch(`/admin/users/${user._id}/balance`, {
                       method: 'PUT',
                       headers,
                       credentials: 'include',

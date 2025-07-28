@@ -5,8 +5,11 @@ import _ from 'lodash';
 import mongoose from 'mongoose';
 import AdminConfig from '../models/AdminConfig';
 
-const BASE_PATH = process.env.BASE_CONFIG_PATH || path.resolve(process.cwd(), 'librechat.yaml');
-const MERGED_PATH = path.resolve(process.cwd(), 'librechat.merged.yaml');
+// Resolve project root based on this file location (../../.. from src/services)
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
+
+const BASE_PATH = process.env.BASE_CONFIG_PATH || path.join(PROJECT_ROOT, 'librechat.yaml');
+const MERGED_PATH = path.join(PROJECT_ROOT, 'librechat.merged.yaml');
 
 async function ensureDbConnection(): Promise<void> {
   if (mongoose.connection.readyState === 1) return;

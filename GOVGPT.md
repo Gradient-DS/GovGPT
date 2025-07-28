@@ -1,4 +1,4 @@
-_internal_
+_public_
 
 # GovGPT / LibreChat – quick run cheatsheet
 

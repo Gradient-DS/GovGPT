@@ -31,8 +31,12 @@ OPENAI_API_KEY=<your-openai-key>
 ## 1  Production stack (pre-built image)
 
 ```bash
-# optional: pull a tagged API image built by CI
-docker pull ghcr.io/gradient-ds/librechat-api:${LIBRECHAT_TAG:-latest}
+# 0  (one-time) authenticate with GitHub Container Registry
+# export a fine-grained PAT that has `read:packages` scope
+docker login ghcr.io
+
+# pull a tagged API image built by CI
+docker compose -f docker-compose.prod.yml pull
 
 # start with production compose
 docker compose -f docker-compose.prod.yml up -d

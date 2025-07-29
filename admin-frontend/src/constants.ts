@@ -26,6 +26,13 @@ export const SETTING_GROUPS: SettingGroup[] = [
     icon: UsersIcon,
     settings: [
       {
+        key: 'allowRegistration',
+        label: 'Allow User Registration',
+        description: 'Enable or disable new-account sign-ups on the login page',
+        type: 'boolean',
+        defaultValue: true,
+      },
+      {
         key: 'balance.enabled',
         label: 'Enable Token Balance System',
         description: 'Turn on per-user token tracking and limits',
@@ -172,6 +179,15 @@ export const SETTING_GROUPS: SettingGroup[] = [
         placeholder: 'execute_code, web_search, actions',
         parentKey: 'interface.agents',
       },
+      {
+        key: 'actions.allowedDomains',
+        label: 'Allowed Domains',
+        description: 'Comma-separated list of domains agents/assistants may call',
+        type: 'textarea',
+        defaultValue: '',
+        placeholder: 'swapi.dev, librechat.ai',
+        parentKey: 'interface.agents',
+      },
       // ----- Memory toggle already exists; attach nested settings -----
       { 
         key: 'interface.memories', 
@@ -281,67 +297,6 @@ export const SETTING_GROUPS: SettingGroup[] = [
     ],
   },
   {
-    id: 'authentication',
-    title: 'Authentication & Social Providers', 
-    description: 'Configure login, registration, and social authentication providers',
-    icon: Shield,
-    settings: [
-      // General Authentication Settings
-      {
-        key: 'allowRegistration',
-        label: 'Allow User Registration',
-        description: 'Enable or disable new-account sign-ups on the login page',
-        type: 'boolean',
-        defaultValue: true,
-      },
-      {
-        key: 'registration.allowedDomains',
-        label: 'Allowed Email Domains',
-        description: 'Restrict self-registration to these domains (comma-separated). Leave empty for no restriction',
-        type: 'text',
-        defaultValue: '',
-        placeholder: 'example.com, myorg.org',
-      },
-      
-      // Individual Social Provider Toggles (auto-generates registration.socialLogins)
-      {
-        key: 'auth.googleEnabled',
-        label: 'Enable Google Login',
-        description: 'Allow users to sign in with Google',
-        type: 'boolean',
-        defaultValue: false,
-      },
-      {
-        key: 'auth.githubEnabled',
-        label: 'Enable GitHub Login',
-        description: 'Allow users to sign in with GitHub',
-        type: 'boolean',
-        defaultValue: false,
-      },
-      {
-        key: 'auth.microsoftEnabled',
-        label: 'Enable Microsoft/Azure AD Login',
-        description: 'Allow users to sign in with Microsoft/Azure AD',
-        type: 'boolean',
-        defaultValue: false,
-      },
-      {
-        key: 'auth.discordEnabled',
-        label: 'Enable Discord Login',
-        description: 'Allow users to sign in with Discord',
-        type: 'boolean',
-        defaultValue: false,
-      },
-      {
-        key: 'auth.facebookEnabled',
-        label: 'Enable Facebook Login',
-        description: 'Allow users to sign in with Facebook',
-        type: 'boolean',
-        defaultValue: false,
-      },
-    ],
-  },
-  {
     id: 'models',
     title: 'Model Access Control',
     description: 'Control which AI models and features are available to users',
@@ -382,23 +337,6 @@ export const SETTING_GROUPS: SettingGroup[] = [
         description: 'Allow share links to be viewed without login',
         type: 'boolean',
         defaultValue: false,
-      },
-    ],
-  },
-
-  {
-    id: 'actions',
-    title: 'Actions (OpenAPI)',
-    description: 'Restrict what external domains can be called by actions',
-    icon: Globe,
-    settings: [
-      {
-        key: 'actions.allowedDomains',
-        label: 'Allowed Domains',
-        description: 'Comma-separated list of domains agents/assistants may call',
-        type: 'textarea',
-        defaultValue: '',
-        placeholder: 'swapi.dev, librechat.ai',
       },
     ],
   },

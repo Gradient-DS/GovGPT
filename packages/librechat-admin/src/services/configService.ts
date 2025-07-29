@@ -32,8 +32,6 @@ export const ALLOW_LIST = [
   // Model access toggles within interface section
   'interface.webSearch',
   'interface.runCode',
-  // Registration arrays (not booleans)
-  'registration.allowedDomains',
   // Conversation settings
   'interface.temporaryChat',
   // Agents endpoint settings
@@ -66,17 +64,6 @@ export const ALLOW_LIST = [
   'endpoints.custom',
   // Auth registration toggle
   'auth.allowRegistration',
-  
-  // Registration (LibreChat native)
-  'registration.socialLogins',
-  'registration.allowedDomains',
-  
-  // Social Provider Toggles (auto-generates registration.socialLogins)
-  'auth.googleEnabled',
-  'auth.githubEnabled', 
-  'auth.microsoftEnabled',
-  'auth.discordEnabled',
-  'auth.facebookEnabled',
 ];
 // Determine repository root (../../.. from src/services)
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
@@ -130,17 +117,12 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
     'balance.refillIntervalValue',
     'balance.refillAmount',
     'memory.tokenLimit',
-    // Web Search numeric settings
-    'webSearch.safeSearch',
-    'webSearch.scraperTimeout',
   ]);
 
   const arrayKeys = new Set([
     'endpoints.agents.capabilities',
     'endpoints.agents.allowedProviders',
     'actions.allowedDomains',
-    'registration.socialLogins',
-    'registration.allowedDomains',
     'memory.validKeys',
   ]);
 
@@ -164,12 +146,6 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
   doc.updatedAt = new Date();
 
   await doc.save();
-  // Auto-generate registration.socialLogins if any auth provider keys were modified
-  if (key.startsWith('auth.') && key.endsWith('Enabled')) {
-    autoGenerateSocialLogins(doc);
-    await doc.save();
-  }
-
   await writeOverlayYaml(doc.overrides);
   
   // Filter out auth fields for LibreChat merged config too
@@ -178,37 +154,6 @@ export async function updateOverride(key: string, value: unknown, userId?: strin
   await generateMergedYaml({ overrides: cleanOverrides });
 
   return doc.overrides;
-}
-
-/**
- * Automatically generates the registration.socialLogins array based on enabled provider toggles
- */
-function autoGenerateSocialLogins(doc: any): void {
-  const enabledProviders: string[] = [];
-  
-  // Check each auth provider toggle and add to the list if enabled
-  const auth = doc.overrides.auth || {};
-  
-  if (auth.googleEnabled) {
-    enabledProviders.push('google');
-  }
-  if (auth.githubEnabled) {
-    enabledProviders.push('github');
-  }
-  if (auth.microsoftEnabled) {
-    enabledProviders.push('openid'); // Microsoft/Azure AD uses OpenID Connect
-  }
-  if (auth.discordEnabled) {
-    enabledProviders.push('discord');
-  }
-  if (auth.facebookEnabled) {
-    enabledProviders.push('facebook');
-  }
-
-  // Set the auto-generated list for LibreChat (matches example format)
-  _.set(doc.overrides, 'registration.socialLogins', enabledProviders);
-  doc.markModified('overrides');
-  
 }
 
 

@@ -6,11 +6,12 @@ For every mode below you need **two tiny setup steps first** – they are identi
 
 ```bash
 # 1  Environment file
-cp .env.example .env          # used by both compose and local dev
+cp govgpt.env.example .env          # used by both compose and local dev
 
 # 2  Generated but empty YAML overlays – tracked by .gitignore
 cp librechat.merged.example.yaml librechat.merged.yaml     # ← stays empty on first run
 cp admin-overrides.example.yaml admin-overrides.yaml       # ← stays empty on first run
+cp librechat.example.yaml librechat.yaml
 ```
 
 Now open `.env` and set at minimum:
@@ -18,17 +19,32 @@ Now open `.env` and set at minimum:
 ```dotenv
 # core runtime
 CONFIG_PATH=./librechat.merged.yaml
-LIBRECHAT_TAG=feat-adminpanel_compiletime   # or any tag you built/pulled
+LIBRECHAT_TAG=feat-adminpanel_ui_improvements   # or any tag you built/pulled
 
 # AI provider (used by chat UI **and** RAG embeddings)
 OPENAI_API_KEY=<your-openai-key>
 # …or ANTHROPIC_API_KEY / GOOGLE_KEY …
 # …or a custom endpoint like UbiOps (see the librechat.example.yaml)
 ```
+---
+
+## 1  Production stack (pre-built image)
+
+```bash
+# optional: pull a tagged API image built by CI
+docker pull ghcr.io/gradient-ds/librechat-api:${LIBRECHAT_TAG:-latest}
+
+# start with production compose
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Mounts declared in `docker-compose.prod.yml` map the two YAML files as writable bind mounts so runtime updates persist to the host.
 
 ---
 
-## 1  Dev mode (code on host, services in Docker)
+That’s all – choose the mode that fits your workflow, ensure the two env vars (`CONFIG_PATH`, `LIBRECHAT_TAG`) and an AI key are present, and LibreChat / GovGPT is ready to chat and embed documents.
+
+## 2  Dev mode (code on host, services in Docker)
 
 Spin up the required backing services once:
 
@@ -59,7 +75,7 @@ The `docker-compose.dev.yml` stack exposes the same ports as the local and prod 
 
 ---
 
-## 2  Local Docker stack (developer-friendly)
+## 3  Local Docker stack (developer-friendly)
 
 ```bash
 # build & start using local compose file
@@ -71,22 +87,6 @@ docker compose -f docker-compose.local.yml up --build -d
 The stack watches `admin-overrides.yaml`; saving settings in the Admin Panel rewrites that file and regenerates `librechat.merged.yaml` automatically.
 
 ---
-
-## 3  Production stack (pre-built image)
-
-```bash
-# optional: pull a tagged API image built by CI
-docker pull ghcr.io/gradient-ds/librechat-api:${LIBRECHAT_TAG:-latest}
-
-# start with production compose
-docker compose -f docker-compose.prod.yml up -d
-```
-
-Mounts declared in `docker-compose.prod.yml` map the two YAML files as writable bind mounts so runtime updates persist to the host.
-
----
-
-That’s all – choose the mode that fits your workflow, ensure the two env vars (`CONFIG_PATH`, `LIBRECHAT_TAG`) and an AI key are present, and LibreChat / GovGPT is ready to chat and embed documents.
 
 ## Project Structure
 

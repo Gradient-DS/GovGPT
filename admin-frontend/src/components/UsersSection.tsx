@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SettingToggle from './SettingToggle';
 import { useUsers } from '../hooks/useUsers';
 import { User } from '../hooks/useUsers';
-import UserModal from './UserModal';
+import { UserModal } from './UserModal';
 import CreateUserModal from './CreateUserModal';
 import { useUserStats } from '../hooks/useUserStats';
 

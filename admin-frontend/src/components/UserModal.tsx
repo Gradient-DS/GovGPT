@@ -9,7 +9,7 @@ interface Props {
   onUpdated: () => void;
 }
 
-const UserModal: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
+export const UserModal: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
   const { user, balance, loading, error } = useUser(userId);
   const [role, setRole] = useState('USER');
   const [credits, setCredits] = useState(0);
@@ -165,5 +165,3 @@ const UserModal: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
     </Dialog>
   );
 };
-
-export default UserModal; 

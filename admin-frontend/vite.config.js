@@ -1,19 +1,36 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'node:path';
 
-export default defineConfig({
-  base: '/admin/',
-  plugins: [react(), tailwindcss()],
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
+export default defineConfig(({ mode }) => {
+  // 1) read .env.* or process-env
+  const env = loadEnv(mode, process.cwd(), '');
+  const target = env.VITE_PROXY_TARGET || 'http://localhost:3080';   // backend URL
+
+  return {
+    base: '/admin/',
+    plugins: [react(), tailwindcss()],
+
+    // 2) this block makes all /admin/* and /api/* calls hit your backend
+    server: {
+      proxy: {
+        // API & admin-API calls → backend
+        '/api':   { target, changeOrigin: true },
+
+        // explicit admin-plugin endpoints
+        '/admin/config': { target, changeOrigin: true },
+        '/admin/users':  { target, changeOrigin: true },
+        '/admin/health': { target, changeOrigin: true },
+        // add more endpoints here as they appear
+      },
     },
-    dedupe: ['react', 'react-dom'],
-  },
+
+    build: { outDir: 'dist', emptyOutDir: true },
+
+    resolve: {
+      alias: { '@': path.resolve(__dirname, 'src') },
+      dedupe: ['react', 'react-dom'],
+    },
+  };
 }); 

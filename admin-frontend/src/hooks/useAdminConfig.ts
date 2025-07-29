@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import _ from 'lodash';
 
 interface Overrides {
   [key: string]: unknown;
@@ -13,7 +14,11 @@ interface UseAdminConfig {
   loading: boolean;
   error: string | null;
   saving: boolean;
-  updateSetting: (key: string, value: unknown) => Promise<void>;
+  restarting: boolean;
+  dirty: boolean;
+  draft: Overrides;
+  editDraft: (key: string, value: unknown) => void;
+  discardDraft: () => void;
   applyChanges: () => Promise<void>;
   isAuthError: boolean;
 }
@@ -25,10 +30,14 @@ interface UseAdminConfig {
  * POST /admin/config          → { key, value }  (update single path)
  */
 export function useAdminConfig(): UseAdminConfig {
-  const [overrides, setOverrides] = useState<Overrides>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // saving is used for background POSTs (should be rare once we batch apply)
   const [saving, setSaving] = useState(false);
+  const [restarting, setRestarting] = useState(false);
+
+  const [overrides, setOverrides] = useState<Overrides>();
+  const [draft, setDraft] = useState<Overrides>({});
   const [isAuthError, setIsAuthError] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
@@ -147,7 +156,9 @@ export function useAdminConfig(): UseAdminConfig {
         const data: AdminConfigResponse = await res.json();
         console.log('Response data:', data);
         
-        setOverrides(data.overrides ?? {});
+        const serverOverrides = data.overrides ?? {};
+        setOverrides(serverOverrides);
+        setDraft(_.cloneDeep(serverOverrides));
         console.log('Config fetch successful');
       } catch (err) {
         console.log('Config fetch error:', err);
@@ -161,75 +172,79 @@ export function useAdminConfig(): UseAdminConfig {
     fetchConfig();
   }, [getAuthHeaders, token]);
 
-  const updateSetting = useCallback(async (key: string, value: unknown) => {
-    console.log('\n=== UPDATING SETTING ===');
-    console.log('Key:', key);
-    console.log('Value:', value);
-    
-    setSaving(true);
-    try {
-      const url = '/admin/config';
-      const headers = getAuthHeaders();
-      const body = JSON.stringify({ key, value });
-      
-      console.log('Making POST request to:', url);
-      console.log('With headers:', headers);
-      console.log('With body:', body);
-      
-      const res = await fetch(url, {
-        method: 'POST',
-        headers,
-        credentials: 'include',
-        body,
-      });
-      
-      console.log('POST completed, handling response...');
-      await handleResponse(res);
-      
-      console.log('Parsing JSON response...');
-      const data: AdminConfigResponse = await res.json();
-      console.log('Response data:', data);
-      
-      setOverrides(data.overrides ?? {});
-      console.log('Setting update successful');
-    } catch (err) {
-      console.log('Setting update error:', err);
-      throw err;
-    } finally {
-      setSaving(false);
-      console.log('Setting update completed');
+  const editDraft = useCallback((key: string, value: unknown) => {
+    setDraft((prev) => {
+      const clone = _.cloneDeep(prev);
+      _.set(clone, key, value);
+      return clone;
+    });
+  }, []);
+
+  const discardDraft = useCallback(() => {
+    if (overrides) {
+      setDraft(_.cloneDeep(overrides));
     }
-  }, [getAuthHeaders]);
+  }, [overrides]);
 
   const applyChanges = useCallback(async () => {
-    console.log('\n=== APPLYING CHANGES & RESTART ===');
+    if (!overrides) return;
+
+    console.log('\n=== APPLYING DRAFT CHANGES ===');
     setSaving(true);
     try {
+      // Flatten objects to dot-notated paths to compare values
+      const flatten = (obj: any, prefix = ''): Record<string, unknown> => {
+        return Object.keys(obj).reduce((acc: any, key) => {
+          const path = prefix ? `${prefix}.${key}` : key;
+          if (_.isObjectLike(obj[key]) && !Array.isArray(obj[key])) {
+            Object.assign(acc, flatten(obj[key], path));
+          } else {
+            acc[path] = obj[key];
+          }
+          return acc;
+        }, {});
+      };
+
+      const flatDraft = flatten(draft);
+      const flatOverrides = flatten(overrides);
+
       const headers = getAuthHeaders();
 
-      const restartUrl = '/api/restart';
-      console.log('Triggering backend restart via:', restartUrl);
-      await fetch(restartUrl, {
+      const diff: Record<string, unknown> = {};
+      for (const [path, val] of Object.entries(flatDraft)) {
+        if (!_.isEqual(val, flatOverrides[path])) {
+          diff[path] = val;
+        }
+      }
+
+      // Send entire draft so server writes complete YAML
+      setRestarting(true);
+      await fetch('/admin/config', {
         method: 'POST',
         headers,
         credentials: 'include',
+        body: JSON.stringify({ overrides: draft }),
       });
-      console.log('Restart request sent');
-    } catch (err) {
-      // Fetch may fail due to the server shutting down; safely ignore.
-      console.warn('Restart request error (expected if server is restarting):', err);
     } finally {
       setSaving(false);
-      console.log('Restart process initiated');
     }
-  }, [getAuthHeaders]);
+  }, [draft, overrides, getAuthHeaders, handleResponse]);
+
+  const dirty = useMemo(() => {
+    if (!overrides) return false;
+    return !_.isEqual(draft, overrides);
+  }, [draft, overrides]);
 
   return {
     overrides,
     loading,
     error,
     saving,
-    updateSetting,
+    restarting,
+    dirty,
+    draft,
+    editDraft,
+    discardDraft,
     applyChanges,
     isAuthError,
   };

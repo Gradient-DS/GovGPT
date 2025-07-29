@@ -2,12 +2,14 @@ import React from 'react';
 import { LayoutDashboard, Menu } from 'lucide-react';
 
 interface AdminHeaderProps {
-  saving: boolean;
+  restarting: boolean;
+  dirty: boolean;
   onApplyChanges: () => void;
+  onHome: () => void;
   onToggleSidebar?: () => void;
 }
 
-export const AdminHeader: React.FC<AdminHeaderProps> = ({ saving, onApplyChanges, onToggleSidebar }) => {
+export const AdminHeader: React.FC<AdminHeaderProps> = ({ restarting, dirty, onApplyChanges, onHome, onToggleSidebar }) => {
   return (
     <div className="flex items-center justify-between bg-white border-b border-gray-200 px-6 py-3 shadow-sm z-20">
       <div className="flex items-center">
@@ -27,21 +29,39 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ saving, onApplyChanges
           <span className="ml-2">Admin Panel</span>
         </h1>
       </div>
-      
-      <button
-        onClick={onApplyChanges}
-        disabled={saving}
-        className={`
-          px-6 py-3 bg-blue-600 text-white border-0 rounded-md text-sm font-medium
+
+      {/* Right side buttons */}
+      <div className="flex items-center space-x-4">
+        {/* Home button */}
+        <button
+          onClick={onHome}
+          className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors"
+        >
+          Home
+        </button>
+
+        {/* Apply & Restart */}
+        <button
+          onClick={onApplyChanges}
+          disabled={!dirty || restarting}
+          className={`
+          relative px-6 py-3 bg-blue-600 text-white border-0 rounded-md text-sm font-medium
           transition-all duration-200
-          ${saving 
-            ? 'cursor-not-allowed opacity-60' 
-            : 'cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-          }
+          ${(!dirty || restarting)
+            ? 'cursor-not-allowed opacity-60'
+            : 'cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'}
         `}
-      >
-        {saving ? 'Applying…' : 'Apply & Restart'}
-      </button>
+        >
+          {restarting ? 'Applying…' : 'Apply & Restart'}
+
+          {dirty && !restarting && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+            </span>
+          )}
+        </button>
+      </div>
     </div>
   );
 }; 

@@ -82,19 +82,52 @@ export function buildAdminRouter(
     }
   });
 
+  // Apply multiple overrides then restart
   router.post('/config', async (req, res) => {
     try {
-      const { key, value } = req.body;
-      if (!key) {
-        return res.status(400).json({ message: 'key required' });
+      const { overrides } = req.body as { overrides: Record<string, unknown> };
+      if (!overrides || typeof overrides !== 'object') {
+        return res.status(400).json({ message: 'overrides object required' });
       }
-      // @ts-ignore – user extension of Express Request
-      const overrides = await updateOverride(key, value, req.user?.id);
-      res.json({ overrides });
+
+      // @ts-ignore user extension
+      const userId = req.user?.id;
+      const { updateOverride } = require('../services/configService');
+
+      /* ------------------------------------------------------------------ */
+      /* Flatten nested objects so the configService can validate using the */
+      /* dot.notation allow-list (e.g. "interface.customWelcome").         */
+      /* ------------------------------------------------------------------ */
+      const flatten = (obj: Record<string, any>, prefix = ''): Record<string, unknown> => {
+        return Object.keys(obj).reduce((acc: Record<string, unknown>, key) => {
+          const path = prefix ? `${prefix}.${key}` : key;
+          const val = obj[key];
+
+          if (val && typeof val === 'object' && !Array.isArray(val)) {
+            Object.assign(acc, flatten(val, path));
+          } else {
+            acc[path] = val;
+          }
+          return acc;
+        }, {});
+      };
+
+      const flatOverrides = flatten(overrides as Record<string, any>);
+
+      for (const [key, value] of Object.entries(flatOverrides)) {
+        await updateOverride(key, value, userId);
+      }
+
+      res.status(200).json({ message: 'Applied changes, restarting...' });
+
+      // Quit process after short delay so writes flush
+      setTimeout(() => process.exit(0), 100);
     } catch (err: any) {
-      res.status(err.status || 500).json({ message: err.message });
+      console.error('[admin/config] apply error', err);
+      res.status(500).json({ message: (err as Error).message });
     }
   });
+  
 
   // ---------- User Management Endpoints ----------
   const {

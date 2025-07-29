@@ -7,16 +7,22 @@ import Sidebar from './Sidebar';
 
 interface AdminLayoutProps {
   values: Record<string, unknown>;
-  saving: boolean;
+  saving: boolean; // currently unused but kept for potential future disable states
+  restarting: boolean;
+  dirty: boolean;
   onUpdateSetting: (key: string, value: unknown) => void;
   onApplyChanges: () => void;
+  onHome: () => void;
 }
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
   values,
   saving,
+  restarting,
+  dirty,
   onUpdateSetting,
   onApplyChanges,
+  onHome,
 }) => {
   const [activeGroupId, setActiveGroupId] = useState<string>(SETTING_GROUPS[0].id);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
@@ -57,7 +63,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   return (
     <div className="font-sans h-screen overflow-hidden flex flex-col">
       <AdminHeader 
-        saving={saving} 
+        restarting={restarting}
+        dirty={dirty}
+        onHome={onHome}
         onApplyChanges={onApplyChanges}
         onToggleSidebar={isMobile ? toggleSidebar : undefined}
       />

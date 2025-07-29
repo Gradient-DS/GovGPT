@@ -399,4 +399,19 @@ export const SETTING_GROUPS: SettingGroup[] = [
       },
     ],
   },
+  {
+    id: 'deprecatedBeta',
+    title: 'Deprecated & Beta',
+    description: 'Control access to deprecated or experimental functionality',
+    icon: Shield,
+    settings: [
+      {
+        key: 'interface.plugins',
+        label: 'Plugins Endpoint',
+        description: 'Enable or disable the ChatGPT Plugins endpoint for users',
+        type: 'boolean',
+        defaultValue: true,
+      },
+    ],
+  },
 ]; 

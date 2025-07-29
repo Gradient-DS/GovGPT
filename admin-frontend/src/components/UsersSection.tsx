@@ -52,9 +52,6 @@ const UsersSection: React.FC<UsersSectionProps> = ({ values, saving, onUpdateSet
   // local state for numeric inputs with step selector
   const [stepSize, setStepSize] = useState<number>(1000);
 
-  // Allow Registration toggle
-  const allowRegistration = (values['allowRegistration'] as boolean) ?? true;
-
   const startBalance = (values['balance.startBalance'] as number) ?? 0;
   const balanceEnabled = (values['balance.enabled'] as boolean) ?? false;
   const refillEnabled = (values['balance.autoRefillEnabled'] as boolean) ?? false;
@@ -180,15 +177,6 @@ const UsersSection: React.FC<UsersSectionProps> = ({ values, saving, onUpdateSet
 
       {/* User management configuration card */}
       <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700">
-        {/* Registration toggle */}
-        <SettingToggle
-          label="Allow User Registration"
-          description="Enable or disable new-account sign-ups on the login page"
-          value={allowRegistration}
-          disabled={saving}
-          onChange={(v) => onUpdateSetting('allowRegistration', v)}
-        />
-
         {/* Token balance system - Level 0 toggle */}
         <SettingToggle
           label="Enable Token Balance System"

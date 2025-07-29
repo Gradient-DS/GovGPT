@@ -62,8 +62,8 @@ export const ALLOW_LIST = [
   'memory.agent.id',
   // Custom endpoints
   'endpoints.custom',
-  // Registration toggle
-  'allowRegistration',
+  // Plugins endpoint & Beta features
+  'interface.plugins',
 ];
 // Determine repository root (../../.. from src/services)
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..');

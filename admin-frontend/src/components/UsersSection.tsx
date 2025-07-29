@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatNumber } from '../utils/helpers';
 import SettingToggle from './SettingToggle';
 import { useUsers } from '../hooks/useUsers';
 import { User } from '../hooks/useUsers';
@@ -22,7 +23,7 @@ const UserRow: React.FC<{ user: User }> = ({ user }) => (
   <tr className="border-b border-gray-200 dark:border-gray-700">
     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.email}</td>
     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.role}</td>
-    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{user.tokenCredits ?? '—'}</td>
+    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{formatNumber(user.tokenCredits)}</td>
   </tr>
 );
 
@@ -119,7 +120,7 @@ const UsersSection: React.FC<UsersSectionProps> = ({ values, saving, onUpdateSet
                 <tr key={u._id} className="cursor-pointer hover:bg-gray-50" onClick={()=>setSelectedId(u._id)}>
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{u.email}</td>
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{u.role}</td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{u.tokenCredits ?? '—'}</td>
+                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{formatNumber(u.tokenCredits)}</td>
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{u.username ?? '—'}</td>
                   <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{new Date(u.createdAt as any).toLocaleDateString()}</td>
                 </tr>

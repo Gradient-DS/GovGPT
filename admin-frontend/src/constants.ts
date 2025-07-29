@@ -1,11 +1,32 @@
 import { Settings, Palette, Key, KeySquare, MessageSquare, Image, Shield, Globe, Link, Wallet, Users as UsersIcon } from 'lucide-react';
 
+export const AGENT_CAPABILITIES = [
+  {
+    id: 'file_search',
+    label: 'File Search',
+    description: 'Enable file searching and document analysis',
+    icon: '📁'
+  },
+  {
+    id: 'web_search',
+    label: 'Web Search',
+    description: 'Allow agents to search the internet',
+    icon: '🌐'
+  },
+  {
+    id: 'chain',
+    label: 'Chain',
+    description: 'Enable chaining of agent operations',
+    icon: '🔗'
+  }
+] as const;
+
 export interface Setting {
   key: string;
   label: string;
   description: string;
-  type: 'boolean' | 'text' | 'textarea' | 'url' | 'number';
-  defaultValue: boolean | string | number;
+  type: 'boolean' | 'text' | 'textarea' | 'url' | 'number' | 'capabilities';
+  defaultValue: boolean | string | number | string[];
   placeholder?: string;
   parentKey?: string; // optional dependency key
 }
@@ -173,10 +194,9 @@ export const SETTING_GROUPS: SettingGroup[] = [
       {
         key: 'endpoints.agents.capabilities',
         label: 'Agent Capabilities',
-        description: 'Comma-separated capabilities to expose (execute_code, web_search, etc.)',
-        type: 'text',
-        defaultValue: '',
-        placeholder: 'execute_code, web_search, actions',
+        description: 'Select which capabilities agents can use',
+        type: 'capabilities',
+        defaultValue: [],
         parentKey: 'interface.agents',
       },
       {

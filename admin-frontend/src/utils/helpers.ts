@@ -8,13 +8,12 @@ export function getNested(obj: any, path: string): any {
 /**
  * Creates a values map from settings groups and overrides object
  */
-export function createValuesMap(overrides: any, settingGroups: any[]): Record<string, unknown> {
-  if (!overrides) return {};
-  
+export function createValuesMap(overrides: Record<string, unknown> | undefined, settingGroups: any[]): Record<string, unknown> {
   const map: Record<string, unknown> = {};
   for (const group of settingGroups) {
     for (const setting of group.settings) {
-      map[setting.key] = getNested(overrides, setting.key);
+      const value = getNested(overrides, setting.key);
+      map[setting.key] = value !== undefined ? value : setting.defaultValue;
     }
   }
   return map;

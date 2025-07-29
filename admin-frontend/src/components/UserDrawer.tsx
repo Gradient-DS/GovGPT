@@ -88,7 +88,7 @@ const UserDrawer: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
                     setSaving(false);
                   }
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
               >
                 {saving ? 'Saving…' : 'Save'}
               </button>

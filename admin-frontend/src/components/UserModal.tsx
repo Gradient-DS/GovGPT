@@ -153,7 +153,7 @@ export const UserModal: React.FC<Props> = ({ userId, onClose, onUpdated }) => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm disabled:opacity-50"
+                  className="px-4 py-2 bg-green-500 text-white rounded-md text-sm disabled:opacity-50 hover:bg-green-600"
                 >
                   {saving ? 'Saving…' : 'Save'}
                 </button>

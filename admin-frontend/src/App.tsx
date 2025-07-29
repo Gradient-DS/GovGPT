@@ -62,7 +62,7 @@ const App: FC = () => {
             <div className="space-y-3">
               <a
                 href="/"
-                className="inline-block w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="inline-block w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
               >
                 Go to LibreChat
               </a>

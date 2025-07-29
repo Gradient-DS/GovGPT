@@ -46,11 +46,18 @@ async function loadAdminOverrides(): Promise<Record<string, unknown>> {
     }
 }
 
+function customMerge(objValue: any, srcValue: any): any {
+  if (Array.isArray(srcValue)) {
+    return srcValue;
+  }
+  return undefined;
+}
+
 export async function generateMergedYaml(options: { overrides?: Record<string, unknown>; preStartup?: boolean } = {}): Promise<Record<string, unknown>> {
   try {
     const base = loadYamlSafe(BASE_PATH);
     const adminOverrides = options.overrides !== undefined ? options.overrides : await loadAdminOverrides();
-    const merged = _.merge({}, base, adminOverrides);
+    const merged = _.mergeWith({}, base, adminOverrides, customMerge);
 
     fs.writeFileSync(MERGED_PATH, yaml.dump(merged, { lineWidth: 120 }), 'utf8');
 

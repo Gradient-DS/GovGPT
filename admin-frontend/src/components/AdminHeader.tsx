@@ -45,11 +45,11 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ restarting, dirty, onA
           onClick={onApplyChanges}
           disabled={!dirty || restarting}
           className={`
-          relative px-6 py-3 bg-blue-600 text-white border-0 rounded-md text-sm font-medium
+          relative px-6 py-3 bg-green-500 text-white border-0 rounded-md text-sm font-medium
           transition-all duration-200
           ${(!dirty || restarting)
             ? 'cursor-not-allowed opacity-60'
-            : 'cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'}
+            : 'cursor-pointer hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}
         `}
         >
           {restarting ? 'Applying…' : 'Apply & Restart'}

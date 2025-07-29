@@ -72,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   w-full flex items-center gap-3 px-3 py-3 text-sm rounded-lg transition-all duration-200
                   min-h-[44px] text-left
                   ${isActive 
-                    ? 'bg-blue-500 text-white' 
+                    ? 'bg-green-500 text-white' 
                     : 'text-gray-700 hover:bg-gray-100'
                   }
                 `}
@@ -105,7 +105,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   w-full flex items-center gap-3 px-3 py-3 text-sm rounded-lg transition-all duration-200
                   min-h-[44px] text-left
                   ${isActive 
-                    ? 'bg-blue-500 text-white' 
+                    ? 'bg-green-500 text-white' 
                     : 'text-gray-700 hover:bg-gray-100'
                   }
                 `}

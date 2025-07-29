@@ -75,7 +75,7 @@ export function useAdminConfig(): UseAdminConfig {
         const newToken: string | undefined = (data && data.token) || undefined;
 
         if (!newToken) {
-          console.log('[Admin] No JWT token returned – user not logged in. Redirecting to /login');
+          // Redirect to login if no token returned
           window.location.replace('/login');
           return;
         }
@@ -95,29 +95,19 @@ export function useAdminConfig(): UseAdminConfig {
   }, [token]);
 
   const handleResponse = async (response: Response) => {
-    console.log('handleResponse called');
-    console.log('Response status:', response.status);
-    console.log('Response statusText:', response.statusText);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
     
     if (response.status === 401) {
-      console.log('401 Unauthorized detected');
       setIsAuthError(true);
       throw new Error('Authentication required. Please log in to LibreChat first.');
     }
     if (response.status === 403) {
-      console.log('403 Forbidden detected');
       setIsAuthError(true);
       throw new Error('Access denied. Admin privileges required.');
     }
     if (!response.ok) {
-      console.log('Non-OK response detected');
       const errorText = await response.text();
-      console.log('Error response text:', errorText);
       throw new Error(errorText || `HTTP ${response.status}: ${response.statusText}`);
     }
-    
-    console.log('Response is OK');
     return response;
   };
 
@@ -131,7 +121,6 @@ export function useAdminConfig(): UseAdminConfig {
     }
 
     const fetchConfig = async () => {
-      console.log('\n=== FETCHING CONFIG ===');
       setLoading(true);
       setError(null);
       setIsAuthError(false);
@@ -140,32 +129,21 @@ export function useAdminConfig(): UseAdminConfig {
         const url = '/admin/config';
         const headers = getAuthHeaders();
         
-        console.log('Making fetch request to:', url);
-        console.log('With headers:', headers);
-        console.log('With credentials: include');
-        
         const res = await fetch(url, {
           headers,
           credentials: 'include', // Important: include cookies for authentication
         });
         
-        console.log('Fetch completed, handling response...');
         await handleResponse(res);
         
-        console.log('Parsing JSON response...');
         const data: AdminConfigResponse = await res.json();
-        console.log('Response data:', data);
-        
         const serverOverrides = data.overrides ?? {};
         setOverrides(serverOverrides);
         setDraft(_.cloneDeep(serverOverrides));
-        console.log('Config fetch successful');
       } catch (err) {
-        console.log('Config fetch error:', err);
         setError((err as Error).message);
       } finally {
         setLoading(false);
-        console.log('Config fetch completed');
       }
     };
 
@@ -189,7 +167,7 @@ export function useAdminConfig(): UseAdminConfig {
   const applyChanges = useCallback(async () => {
     if (!overrides) return;
 
-    console.log('\n=== APPLYING DRAFT CHANGES ===');
+    // Applying draft changes
     setSaving(true);
     try {
       // Flatten objects to dot-notated paths to compare values

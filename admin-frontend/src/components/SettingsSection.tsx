@@ -2,6 +2,7 @@ import React from 'react';
 import { SettingGroup } from '../constants';
 import SettingToggle from './SettingToggle';
 import SettingText from './SettingText';
+import { AgentCapabilities } from './AgentCapabilities';
 
 interface SettingsSectionProps {
   group: SettingGroup;
@@ -77,6 +78,21 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
               </div>
             );
           }
+
+          if (setting.type === 'capabilities') {
+            return (
+              <div className={containerClass} key={setting.key}>
+                <AgentCapabilities
+                  label={setting.label}
+                  description={setting.description}
+                  value={Array.isArray(current) ? current : []}
+                  disabled={saving}
+                  onChange={(v) => onUpdateSetting(setting.key, v)}
+                />
+              </div>
+            );
+          }
+
           return null;
         })}
       </div>

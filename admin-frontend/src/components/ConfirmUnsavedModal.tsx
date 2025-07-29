@@ -28,7 +28,7 @@ export const ConfirmUnsavedModal: React.FC<Props> = ({ onApply, onDiscard, onCan
             Cancel
           </button>
           <button
-            className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
+            className="px-4 py-2 text-sm rounded-md bg-green-500 text-white hover:bg-green-600"
             onClick={onApply}
           >
             Apply &amp; Restart

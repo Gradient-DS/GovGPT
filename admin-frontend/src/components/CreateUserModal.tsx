@@ -121,7 +121,7 @@ const CreateUserModal: React.FC<Props> = ({ onClose, onCreated }) => {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={onClose} className="px-4 py-2 border rounded-md text-sm">Cancel</button>
-              <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm disabled:opacity-50">
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-green-500 text-white rounded-md text-sm disabled:opacity-50 hover:bg-green-600">
                 {saving ? 'Creating…' : 'Create'}
               </button>
             </div>

@@ -18,7 +18,7 @@ Now open `.env` and set at minimum:
 
 ```dotenv
 # core runtime
-CONFIG_PATH=./librechat.merged.yaml
+CONFIG_PATH="librechat.merged.yaml"
 LIBRECHAT_TAG=feat-adminpanel_ui_improvements   # or any tag you built/pulled
 
 # AI provider (used by chat UI **and** RAG embeddings)
@@ -47,6 +47,10 @@ Mounts declared in `docker-compose.prod.yml` map the two YAML files as writable 
 ---
 
 That’s all – choose the mode that fits your workflow, ensure the two env vars (`CONFIG_PATH`, `LIBRECHAT_TAG`) and an AI key are present, and LibreChat / GovGPT is ready to chat and embed documents.
+
+Probably running at http://localhost:3080 if you did not change the config.
+
+The Admin panel is reachable from the account settings in the bottom left of the main application. 
 
 ## 2  Dev mode (code on host, services in Docker)
 

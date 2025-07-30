@@ -1,8 +1,9 @@
 import { useState, memo } from 'react';
 import { useRecoilState } from 'recoil';
 import * as Select from '@ariakit/react/select';
-import { FileText, LogOut } from 'lucide-react';
+import { FileText, LogOut, ShieldEllipsis } from 'lucide-react';
 import { LinkIcon, GearIcon, DropdownMenuSeparator } from '~/components';
+import { SystemRoles } from 'librechat-data-provider';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import FilesView from '~/components/Chat/Input/Files/FilesView';
 import { useAuthContext } from '~/hooks/AuthContext';
@@ -100,6 +101,16 @@ function AccountSettings() {
           >
             <LinkIcon aria-hidden="true" />
             {localize('com_nav_help_faq')}
+          </Select.SelectItem>
+        )}
+        {user?.role === SystemRoles.ADMIN && (
+          <Select.SelectItem
+            value=""
+            onClick={() => window.open('/admin', '_blank')}
+            className="select-item text-sm"
+          >
+            <ShieldEllipsis className="icon-md" aria-hidden="true" />
+            {localize('com_ui_admin')}
           </Select.SelectItem>
         )}
         <Select.SelectItem

@@ -1,7 +1,10 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-require('module-alias')({ base: path.resolve(__dirname, '..') });
+require('module-alias')({ 
+  base: path.resolve(__dirname, '..'),
+  '~': path.resolve(__dirname, '..')
+});
 const cors = require('cors');
 const axios = require('axios');
 const express = require('express');
@@ -119,6 +122,14 @@ const startServer = async () => {
   app.use('/api/memories', routes.memories);
   app.use('/api/tags', routes.tags);
   app.use('/api/mcp', routes.mcp);
+
+  // Mount custom extensions
+  try {
+    require('custom')(app);
+  } catch (e) {
+    // Silent fail als custom niet bestaat
+    console.warn('[Custom] Mount failed:', e.message);
+  }
 
   // Add the error controller one more time after all routes
   app.use(errorController);

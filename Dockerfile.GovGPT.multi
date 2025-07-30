@@ -1,5 +1,5 @@
 # Dockerfile.multi
-# v0.7.9
+# v0.7.9-rc1
 
 # Base for all builds
 FROM node:20-alpine AS base-min
@@ -16,6 +16,9 @@ COPY package*.json ./
 COPY packages/data-provider/package*.json ./packages/data-provider/
 COPY packages/api/package*.json ./packages/api/
 COPY packages/data-schemas/package*.json ./packages/data-schemas/
+COPY packages/librechat-admin/package*.json ./packages/librechat-admin/
+COPY packages/custom/package*.json ./packages/custom/
+COPY admin-frontend/package*.json ./admin-frontend/
 COPY client/package*.json ./client/
 COPY api/package*.json ./api/
 
@@ -45,6 +48,23 @@ COPY --from=data-provider-build /app/packages/data-provider/dist /app/packages/d
 COPY --from=data-schemas-build /app/packages/data-schemas/dist /app/packages/data-schemas/dist
 RUN npm run build
 
+# Build librechat-admin package
+FROM base AS admin-package-build
+WORKDIR /app/packages/librechat-admin
+COPY packages/librechat-admin ./
+COPY --from=data-provider-build /app/packages/data-provider/dist /app/packages/data-provider/dist
+COPY --from=data-schemas-build /app/packages/data-schemas/dist /app/packages/data-schemas/dist
+RUN npm run build
+
+# Build admin frontend
+FROM base AS admin-frontend-build
+WORKDIR /app/admin-frontend
+# Copy only package.json to avoid lockfile mismatch, then install deps
+COPY admin-frontend/package.json ./
+RUN npm install
+COPY admin-frontend ./
+RUN npm run build
+
 # Client build
 FROM base AS client-build
 WORKDIR /app/client
@@ -63,9 +83,12 @@ WORKDIR /app
 RUN npm ci --omit=dev
 COPY api ./api
 COPY config ./config
+COPY packages/custom ./packages/custom
 COPY --from=data-provider-build /app/packages/data-provider/dist ./packages/data-provider/dist
 COPY --from=data-schemas-build /app/packages/data-schemas/dist ./packages/data-schemas/dist
 COPY --from=api-package-build /app/packages/api/dist ./packages/api/dist
+COPY --from=admin-package-build /app/packages/librechat-admin/dist ./packages/librechat-admin/dist
+COPY --from=admin-frontend-build /app/admin-frontend/dist ./admin-frontend/dist
 COPY --from=client-build /app/client/dist ./client/dist
 WORKDIR /app/api
 EXPOSE 3080

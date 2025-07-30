@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile.multi
+          file: Dockerfile.GovGPT.multi
           target: api-build
           push: true
           platforms: linux/amd64,linux/arm64

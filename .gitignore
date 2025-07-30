@@ -66,6 +66,8 @@ bower_components/
 #config file
 librechat.yaml
 librechat.yml
+admin-overrides.yaml
+librechat.merged.yaml
 
 # Environment
 .npmrc
@@ -134,3 +136,4 @@ helm/**/.values.yaml
 /.openai/
 /.tabnine/
 /.codeium
+

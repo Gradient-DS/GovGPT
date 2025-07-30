@@ -1,344 +1,144 @@
-_internal_
-_research_ 
-# LibreChat Setup Guide
+_public_
 
-This repository contains [LibreChat](https://librechat.ai), an open-source AI chat interface that supports multiple AI providers including OpenAI, Anthropic, Google, and many others.
+# GovGPT / LibreChat – quick run cheatsheet
 
-## Quick Start with Docker (Recommended)
-
-> **Using the pre-built GovGPT image**
->
-> If you just want to run the image that is automatically built from this repository, follow these two extra steps **before** you run `docker compose up`:
->
-> 1.  **Choose how to set the tag** – either export it **or** place it in your `.env` file (you are copying this file anyway):
->
->     ```bash
->     # option A – shell variable (previous example)
->     export LIBRECHAT_TAG=feat-adminpanel_runtime
->
->     # option B – inside .env (recommended if you always use the GovGPT image)
->     cp .env.example .env          # if you haven’t yet
->     echo 'LIBRECHAT_TAG=feat-adminpanel_runtime' >> .env
->     ```
->
->     Docker Compose will substitute `LIBRECHAT_TAG` from either source.
->
-> 2.  **Ensure a config file is present** – LibreChat expects `librechat.yaml` in the project root.  If you haven’t customised it yet, just copy the example:
->
->     ```bash
->     cp librechat.example.yaml librechat.yaml
->     ```
->
-> 3.  **Copy the override** that pins the API service to your own image (or pass it with `-f`):
->
->     ```bash
->     cp docker-compose.govgpt.yml.example docker-compose.override.yml
->     ```
->
->     The override contains:
->
->     ```yaml
->     services:
->       api:
->         image: ghcr.io/gradient-ds/librechat-api:${LIBRECHAT_TAG:-latest}
->     ```
->
-> Now run the normal compose commands:
->
-> ```bash
-> docker compose pull   # optional, but ensures the image is downloaded
-> docker compose up -d  # starts LibreChat using the GovGPT image
-> ```
->
-> If you prefer **not** to create `docker-compose.override.yml`, you can supply the override explicitly:
->
-> ```bash
-> docker compose -f docker-compose.yml -f docker-compose.govgpt.yml.example up -d
-> ```
->
-> Either approach tells Docker Compose to substitute your `LIBRECHAT_TAG` into the image reference so that the stack uses `ghcr.io/gradient-ds/librechat-api:feat-adminpanel_runtime` instead of the default upstream image.
-
-### Prerequisites
-
-1. **Install Docker**
-   - **Windows**: Download [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
-   - **macOS**: Download [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
-   - **Linux**: Install using your package manager:
-     ```bash
-     # Ubuntu/Debian
-     curl -fsSL https://get.docker.com -o get-docker.sh
-     sudo sh get-docker.sh
-     
-     # Or follow the official guide: https://docs.docker.com/engine/install/
-     ```
-
-2. **Verify Docker Installation**
-   ```bash
-   docker --version
-   docker-compose --version
-   ```
-
-### Setup Steps
-
-1. **Clone and navigate to the project**
-   ```bash
-   git clone -b feat/ref_no_module https://gitlab.com/commonground/haven/ai-coordinatie-nederland/safe-gpt.git
-   cd safe-gpt/LibreChat
-   ```
-
-2. **Create environment configuration**
-   ```bash
-   # Copy the example environment file for Docker
-   cp .env.example .env
-   ```
-
-3. **Configure your API keys**
-   
-   Edit the `.env` file and add your API keys. At minimum, you need one AI provider:
-
-   **For OpenAI:**
-   ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   ```
-
-   **For Anthropic (Claude):**
-   ```env
-   ANTHROPIC_API_KEY=your_anthropic_api_key_here
-   ```
-
-   **For Google (Gemini):**
-   ```env
-   GOOGLE_KEY=your_google_api_key_here
-   ```
-
-   > **Source References:**
-   > - Environment configuration: [`LibreChat/.env.example`](LibreChat/.env.example)
-   > - Docker compose setup: [`LibreChat/docker-compose.yml`](LibreChat/docker-compose.yml)
-
-4. **Start LibreChat**
-   ```bash
-   docker compose up --build
-   ```
-
-5. **Access the application**
-   
-   Once the containers are running, open your browser and navigate to:
-   ```
-   http://localhost:3080
-   ```
-
-### Getting API Keys
-
-- **OpenAI**: Visit [platform.openai.com](https://platform.openai.com/api-keys) and create an API key
-- **Anthropic**: Visit [console.anthropic.com](https://console.anthropic.com/) and create an API key  
-- **Google**: Visit [aistudio.google.com](https://aistudio.google.com/) for Gemini API key
-
-## RAG API (Retrieval-Augmented Generation)
-
-LibreChat includes a RAG API service that enables document-based conversations and knowledge retrieval. The RAG API allows you to upload documents and have conversations that reference those documents.
-
-### Included in Docker Setup
-
-The RAG API is **automatically included** when you run the Docker Compose setup. It includes:
-
-- **RAG API Service**: Handles document processing and retrieval
-- **Vector Database**: PostgreSQL with pgvector for storing document embeddings
-- **Automatic Integration**: Works seamlessly with the main LibreChat interface
-
-No additional setup is required - it's ready to use once you start the Docker containers!
-
-### Running RAG API Separately
-
-If you want to run the RAG API as a standalone container, you can use:
+For every mode below you need **two tiny setup steps first** – they are identical in all cases:
 
 ```bash
-# Start the vector database first
-docker run -d \
-  --name vectordb \
-  -e POSTGRES_DB=mydatabase \
-  -e POSTGRES_USER=myuser \
-  -e POSTGRES_PASSWORD=mypassword \
-  -v pgdata:/var/lib/postgresql/data \
-  ankane/pgvector:latest
+# 1  Environment file
+cp govgpt.env.example .env          # used by both compose and local dev
 
-# Start the RAG API
-docker run -d \
-  --name rag_api \
-  -p 8000:8000 \
-  -e DB_HOST=vectordb \
-  -e RAG_PORT=8000 \
-  --link vectordb \
-  ghcr.io/danny-avila/librechat-rag-api-dev-lite:latest
+# 2  Generated but empty YAML overlays – tracked by .gitignore
+cp librechat.merged.example.yaml librechat.merged.yaml     # ← stays empty on first run
+cp admin-overrides.example.yaml admin-overrides.yaml       # ← stays empty on first run
+cp librechat.example.yaml librechat.yaml
 ```
 
-### RAG API Configuration
+Now open `.env` and set at minimum:
 
-You can configure the RAG API port in your `.env` file:
+```dotenv
+# core runtime
+CONFIG_PATH="librechat.merged.yaml"
+LIBRECHAT_TAG=feat-adminpanel_ui_improvements   # or any tag you built/pulled
 
-```env
-# RAG API Configuration
-RAG_PORT=8000
-RAG_API_URL=http://localhost:8000  # For local development
-# RAG_API_URL=http://rag_api:8000  # For Docker Compose (automatic)
+# AI provider (used by chat UI **and** RAG embeddings)
+OPENAI_API_KEY=<your-openai-key>
+# …or ANTHROPIC_API_KEY / GOOGLE_KEY …
+# …or a custom endpoint like UbiOps (see the librechat.example.yaml)
+```
+---
+
+## 1  Production stack (pre-built image)
+
+```bash
+# 0  (one-time) authenticate with GitHub Container Registry
+# export a fine-grained PAT that has `read:packages` scope
+docker login ghcr.io
+
+# pull a tagged API image built by CI
+docker compose -f docker-compose.prod.yml pull
+
+# start with production compose
+docker compose -f docker-compose.prod.yml up -d
 ```
 
-> **Source Reference:** RAG API configuration in [`LibreChat/docker-compose.yml:55-67`](LibreChat/docker-compose.yml)
+Mounts declared in `docker-compose.prod.yml` map the two YAML files as writable bind mounts so runtime updates persist to the host.
 
-## Environment File Strategy
+---
 
-This setup uses separate environment files for different deployment methods:
+That’s all – choose the mode that fits your workflow, ensure the two env vars (`CONFIG_PATH`, `LIBRECHAT_TAG`) and an AI key are present, and LibreChat / GovGPT is ready to chat and embed documents.
 
-- **`.env`** - Used by Docker Compose (contains Docker-specific hostnames like `mongodb`, `meilisearch`)
-- **`.env.local`** - Used for local development (contains localhost addresses for local services)
+Probably running at http://localhost:3080 if you did not change the config.
 
-This separation prevents configuration conflicts between Docker and local development environments.
+The Admin panel is reachable from the account settings in the bottom left of the main application. 
 
-## Local Development Setup (Without Docker)
+## 2  Dev mode (code on host, services in Docker)
 
-### Prerequisites
+Spin up the required backing services once:
 
-- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
-- **MongoDB** (v4.4 or higher) - [Download](https://www.mongodb.com/try/download/community)
-- **MeiliSearch** (optional, for search functionality) - [Download](https://www.meilisearch.com/docs/learn/getting_started/installation)
+```bash
+docker compose -f docker-compose.dev.yml up -d  # MongoDB, MeiliSearch, RAG, etc.
+```
 
-### Setup Steps
+Then, in your working tree:
 
-1. **Install dependencies**
-   ```bash
-   cd LibreChat
-   npm install
-   ```
+```bash
+# install & build shared workspaces
+npm i
+npm run build:data-provider && npm run build:data-schemas && npm run build:api
 
-   > **Source Reference:** Root package.json manages workspaces for [`api`](LibreChat/api/), [`client`](LibreChat/client/), and [`packages/*`](LibreChat/packages/) - see [`LibreChat/package.json:6-9`](LibreChat/package.json)
+# build the GovGPT admin package & admin frontend
+cd packages/librechat-admin && npm run build
+cd ../../admin-frontend       && npm run build
+cd ..                         # back to repo root
 
-2. **Start MongoDB**
-   ```bash
-   # If installed locally
-   mongod
-   
-   # Or using Docker
-   docker run -d --name mongodb -p 27017:27017 mongo
-   ```
+# launch backend with hot-reload
+npm run backend:dev
 
-3. **Start MeiliSearch (optional)**
-   ```bash
-   # If installed locally
-   meilisearch
-   
-   # Or using Docker
-   docker run -d --name meilisearch -p 7700:7700 getmeili/meilisearch:latest
-   ```
+# (optional) second terminal – live-reload React client
+npm run frontend:dev           # http://localhost:3090
+```
 
-4. **Configure environment for local development**
-   ```bash
-   cp .env.example .env.local
-   ```
+The `docker-compose.dev.yml` stack exposes the same ports as the local and prod stacks, so no further configuration is required.
 
-   Edit `.env.local` and configure for local development:
-   ```env
-   # Server Configuration
-   HOST=localhost
-   PORT=3080
-   
-   # Database (local MongoDB)
-   MONGO_URI=mongodb://127.0.0.1:27017/LibreChat
-   
-   # Search (local MeiliSearch)
-   MEILI_HOST=http://127.0.0.1:7700
-   MEILI_MASTER_KEY=your_master_key_here
-   
-   # Domains for local development
-   DOMAIN_CLIENT=http://localhost:3080
-   DOMAIN_SERVER=http://localhost:3080
-   
-   # Your API keys
-   OPENAI_API_KEY=your_openai_api_key_here
-   # or
-   ANTHROPIC_API_KEY=your_anthropic_api_key_here
-   # or
-   GOOGLE_KEY=your_google_api_key_here
-   ```
+---
 
-   > **Note:** We use `.env.local` for local development to avoid conflicts with the `.env` file used by Docker Compose.
+## 3  Local Docker stack (developer-friendly)
 
-5. **Build the project**
-   ```bash
-   # Build data provider and API packages
-   npm run build:data-provider
-   npm run build:data-schemas
-   npm run build:api
-   
-   # Build frontend
-   npm run frontend
-   ```
+```bash
+# build & start using local compose file
+docker compose -f docker-compose.local.yml up --build -d
 
-   > **Source References:**
-   > - Build scripts: [`LibreChat/package.json:31-35`](LibreChat/package.json)
-   > - API dependencies: [`LibreChat/api/package.json`](LibreChat/api/package.json)
-   > - Client dependencies: [`LibreChat/client/package.json`](LibreChat/client/package.json)
+# the UI is now at http://localhost:3080
+```
 
-6. **Start the backend server**
-   ```bash
-   # Load the local environment file
-   cp .env.local .env
-   npm run backend:dev
-   ```
+The stack watches `admin-overrides.yaml`; saving settings in the Admin Panel rewrites that file and regenerates `librechat.merged.yaml` automatically.
 
-   > **Source Reference:** Backend start script: [`LibreChat/package.json:33`](LibreChat/package.json)
-   
-   > **Note:** We temporarily copy `.env.local` to `.env` since the backend expects `.env` by default.
-
-7. **Start the frontend development server** (in a new terminal)
-   ```bash
-   npm run frontend:dev
-   ```
-
-   > **Source Reference:** Frontend dev script: [`LibreChat/package.json:38`](LibreChat/package.json)
-
-8. **Access the application**
-   
-   The application will be available at:
-   ```
-   http://localhost:3090
-   ```
+---
 
 ## Project Structure
 
 ```
-LibreChat/
-├── api/              # Backend API server
-├── client/           # React frontend application  
-├── packages/         # Shared packages
-│   ├── data-provider/   # Data access layer
-│   ├── data-schemas/    # TypeScript schemas
-│   └── api/            # API package
-├── config/           # Configuration utilities
-├── docker-compose.yml # Docker composition
-├── .env.example      # Environment template
-└── librechat.yaml    # Main configuration file
+GovGPT/
+├── api/                    # LibreChat backend (Express)
+├── client/                 # Main user-facing React app
+├── admin-frontend/         # React admin dashboard
+├── packages/
+│   ├── librechat-admin/    # Express router + admin logic
+│   ├── data-provider/      # React-Query hooks & data utils
+│   ├── data-schemas/       # Shared TypeScript/Zod schemas
+│   └── api/                # Client-side API helpers
+│   └── custom/             # Mounts additional routes (e.g. admin) into core app
+├── config/                 # Configuration utilities & scripts
+├── docker-compose.dev.yml  # Containers for dev services
+├── docker-compose.local.yml
+├── docker-compose.prod.yml
+├── .env.example            # Environment template
+├── librechat.yaml          # Base runtime config
+└── GOVGPT.md               # This quick-start guide
 ```
 
-> **Source References:**
-> - Project structure visible in repository root
-> - Workspaces defined in [`LibreChat/package.json:6-9`](LibreChat/package.json)
+### Why three “admin” pieces?
 
-## Configuration
+1. **packages/custom/** – tiny entry-point loaded from `api/server/index.js`.
+   It receives the Express `app` instance and mounts any custom routers
+   (currently the admin router) at runtime. Keeping this in a separate
+   workspace lets us inject routes without touching core LibreChat code.
 
-### Supported AI Providers
+2. **packages/librechat-admin/** – an independent NPM workspace that
+   exposes `buildAdminRouter(requireJwtAuth)`; it contains all backend
+   logic (override settings, user management, etc.).  When `custom/mount.js`
+   runs, it `require`s this package and attaches the router at `/admin`.
 
-LibreChat supports numerous AI providers out of the box:
+3. **admin-frontend/** – a standalone React frontend compiled to static
+   assets that headless-loads inside the `/admin` routes served by the
+   router above.  Building it separately keeps the admin UI dependencies
+   out of the main client bundle.
 
-- **OpenAI** (GPT-4, GPT-3.5, DALL-E)
-- **Anthropic** (Claude models)
-- **Google** (Gemini, PaLM)
-- **Azure OpenAI**
-- **AWS Bedrock**
-- **Local models** via Ollama
-- **Custom endpoints** (any OpenAI-compatible API)
+At runtime the sequence is:
 
-> **Source Reference:** Available endpoints configuration: [`LibreChat/.env.example:45`](LibreChat/.env.example)
-
-
-## License
-
-This project is licensed under the ISC License - see the [LICENSE](LibreChat/LICENSE) file for details.
+1. core `api/server/index.js` → `require('custom').mount(app)`
+2. `packages/custom/mount.js` locates `requireJwtAuth`, builds the admin
+   router from `packages/librechat-admin`, and mounts it.
+3. Requests to `/admin/*` are now handled by the router and serve the
+   admin React bundle.

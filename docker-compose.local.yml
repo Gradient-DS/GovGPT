@@ -60,7 +60,7 @@ services:
       - pgdata2:/var/lib/postgresql/data
 
   rag_api:
-    image: ghcr.io/danny-avila/librechat-rag-api-dev-lite:latest
+    image: ghcr.io/danny-avila/librechat-rag-api-dev:latest
     container_name: local-rag-api
     restart: unless-stopped
     depends_on:

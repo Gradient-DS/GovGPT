@@ -25,6 +25,8 @@ LIBRECHAT_TAG=feat-adminpanel_ui_improvements   # or any tag you built/pulled
 OPENAI_API_KEY=<your-openai-key>
 # …or ANTHROPIC_API_KEY / GOOGLE_KEY …
 # …or a custom endpoint like UbiOps (see the librechat.example.yaml)
+EMBEDDINGS_PROVIDER=ollama
+EMBEDDINGS_MODEL=nomic-embed-text
 ```
 ---
 
@@ -58,6 +60,9 @@ Spin up the required backing services once:
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d  # MongoDB, MeiliSearch, RAG, etc.
+
+# Ollama users – one-time (per machine) pull of the Nomic embed model
+docker compose exec ollama ollama pull nomic-embed-text
 ```
 
 Then, in your working tree:

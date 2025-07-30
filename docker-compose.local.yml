@@ -65,12 +65,26 @@ services:
     restart: unless-stopped
     depends_on:
       - vectordb
+      - ollama
     environment:
       DB_HOST: vectordb
       RAG_PORT: 8000
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OLLAMA_HOST: http://ollama:11434
     env_file:
       - .env
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: local-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama   # persist pulled models
+    environment:
+      - OLLAMA_DISABLE_TELEMETRY=1
+
 volumes:
-  pgdata2: 
+  pgdata2:
+  ollama: 

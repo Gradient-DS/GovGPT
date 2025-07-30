@@ -1,6 +1,7 @@
 import express, { Router, Request, Response, NextFunction } from 'express';
 import { getOverrides, updateOverride } from '../services/configService';
 import path from 'path';
+import { resolveFromRoot } from '../utils/paths';
 import fs from 'fs';
 
 /**
@@ -10,15 +11,8 @@ import fs from 'fs';
  */
 export function buildAdminRouter(
   requireJwtAuth: (req: Request, res: Response, next: NextFunction) => void,
-  options: Record<string, unknown> = {},
 ): Router {
   const router = express.Router();
-
-  // DEBUG: trace all requests that reach the admin router
-  router.use((req, _res, next) => {
-    console.debug('[ADMIN] inside router:', req.method, req.path);
-    next();
-  });
 
   // Importing enums/constants that are safe to resolve directly
   const { SystemRoles } = require('librechat-data-provider');
@@ -90,7 +84,6 @@ export function buildAdminRouter(
         return res.status(400).json({ message: 'overrides object required' });
       }
 
-      // @ts-ignore user extension
       const userId = req.user?.id;
       const { updateOverride } = require('../services/configService');
 
@@ -236,8 +229,8 @@ export function buildAdminRouter(
     }
   });
 
-  // Compute dist path relative to project root (works in dev & container)
-  const distPath = path.join(path.resolve(__dirname, '..', '..', '..', '..'), 'admin-frontend', 'dist');
+  // Compute dist path relative to project root
+  const distPath = resolveFromRoot('admin-frontend', 'dist');
 
   console.log('Admin frontend dist path:', distPath);
 
@@ -265,9 +258,3 @@ export function buildAdminRouter(
 
   return router;
 }
-
-// CommonJS compatibility
-// @ts-ignore
-module.exports = {
-  buildAdminRouter,
-}; 

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { resolveFromRoot } from '../utils/paths';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 import mongoose from 'mongoose';
@@ -65,8 +66,8 @@ export const ALLOW_LIST = [
   // Plugins endpoint & Beta features
   'interface.plugins',
 ];
-// Determine repository root (../../.. from src/services)
-const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
+
+const PROJECT_ROOT = resolveFromRoot();
 
 export const OVERLAY_PATH = process.env.ADMIN_OVERLAY_PATH || path.join(PROJECT_ROOT, 'admin-overrides.yaml');
 

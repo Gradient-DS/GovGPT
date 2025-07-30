@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import { resolveFromRoot } from '../utils/paths';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 import mongoose from 'mongoose';
 import AdminConfig from '../models/AdminConfig';
 
-// Resolve project root based on this file location (../../.. from src/services)
-const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
+const PROJECT_ROOT = resolveFromRoot();
 
 const BASE_PATH = process.env.BASE_CONFIG_PATH || path.join(PROJECT_ROOT, 'librechat.yaml');
 const MERGED_PATH = path.join(PROJECT_ROOT, 'librechat.merged.yaml');
@@ -46,7 +46,7 @@ async function loadAdminOverrides(): Promise<Record<string, unknown>> {
     }
 }
 
-function customMerge(objValue: any, srcValue: any): any {
+function customMerge(srcValue: any): any {
   if (Array.isArray(srcValue)) {
     return srcValue;
   }

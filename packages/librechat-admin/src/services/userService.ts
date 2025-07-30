@@ -58,6 +58,7 @@ export async function getUser(id: string) {
 
 /**
  * Create a new user as ADMIN. Marks emailVerified true by default and allows explicit role.
+ * Temporary for testing with multiple users. In the future only through signup.
  */
 export async function createUser({
   email,

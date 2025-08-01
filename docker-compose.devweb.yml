@@ -69,20 +69,20 @@ services:
     environment:
       - PORT=3000
       - NODE_OPTIONS=--max-old-space-size=8192
-      - BROWSER_POOL_SIZE=1
-      - MAX_CONCURRENT_PAGES=4
-      - PLAYWRIGHT_BROWSER_POOL_SIZE=1
+      - BROWSER_POOL_SIZE=3
+      - MAX_CONCURRENT_PAGES=8
+      - PLAYWRIGHT_BROWSER_POOL_SIZE=3
       - BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
       - LAUNCH_OPTIONS={"args":["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-background-timer-throttling","--disable-renderer-backgrounding","--disable-features=TranslateUI","--disable-extensions","--disable-default-apps","--disable-sync","--metrics-recording-only","--no-first-run","--disable-background-networking"],"timeout":45000}
     deploy:
       resources:
         limits:
-          memory: 6G
-          cpus: '6.0'
+          memory: 8G
+          cpus: '8.0'
         reservations:
-          memory: 3G
-          cpus: '4.0'
-    shm_size: 6gb
+          memory: 4G
+          cpus: '6.0'
+    shm_size: 8gb
     depends_on:
       - firecrawl_redis
 
@@ -100,17 +100,17 @@ services:
       - REDIS_URL=redis://firecrawl_redis:6379
       - REDIS_RATE_LIMIT_URL=redis://firecrawl_redis:6379
       - PLAYWRIGHT_MICROSERVICE_URL=http://playwright_service:3000
-      - NUM_WORKERS_PER_QUEUE=1
-      - CONCURRENCY_LIMIT=1
+      - NUM_WORKERS_PER_QUEUE=3
+      - CONCURRENCY_LIMIT=6
       - USE_DB_AUTHENTICATION=false
     deploy:
       resources:
         limits:
+          memory: 4G
+          cpus: '4.0'
+        reservations:
           memory: 2G
           cpus: '2.0'
-        reservations:
-          memory: 1G
-          cpus: '0.5'
     depends_on:
       - firecrawl_redis
       - playwright_service
@@ -125,16 +125,16 @@ services:
       - REDIS_URL=redis://firecrawl_redis:6379
       - REDIS_RATE_LIMIT_URL=redis://firecrawl_redis:6379
       - PLAYWRIGHT_MICROSERVICE_URL=http://playwright_service:3000
-      - NUM_WORKERS_PER_QUEUE=1
-      - CONCURRENCY_LIMIT=1
+      - NUM_WORKERS_PER_QUEUE=3
+      - CONCURRENCY_LIMIT=6
     deploy:
       resources:
         limits:
-          memory: 3G
-          cpus: '2.0'
+          memory: 4G
+          cpus: '4.0'
         reservations:
-          memory: 1G
-          cpus: '0.5'
+          memory: 2G
+          cpus: '2.0'
     depends_on:
       - firecrawl_redis
       - firecrawl_api

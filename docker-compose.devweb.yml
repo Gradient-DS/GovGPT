@@ -48,97 +48,97 @@ services:
     ports:
       - "8000:8000"
   
-  firecrawl_redis:
-      image: redis:alpine
-      container_name: firecrawl_redis
-      restart: unless-stopped
-      deploy:
-        resources:
-          limits:
-            memory: 512M
-            cpus: '0.5'
-          reservations:
-            memory: 128M
-            cpus: '0.1'
+  # firecrawl_redis:
+  #     image: redis:alpine
+  #     container_name: firecrawl_redis
+  #     restart: unless-stopped
+  #     deploy:
+  #       resources:
+  #         limits:
+  #           memory: 512M
+  #           cpus: '0.5'
+  #         reservations:
+  #           memory: 128M
+  #           cpus: '0.1'
 
-  # ───── Scraper : Firecrawl Playwright ─────
-  playwright_service:
-    image: ghcr.io/mendableai/playwright-service:latest
-    container_name: playwright_service
-    restart: unless-stopped
-    environment:
-      - PORT=3000
-      - NODE_OPTIONS=--max-old-space-size=8192
-      - BROWSER_POOL_SIZE=3
-      - MAX_CONCURRENT_PAGES=8
-      - PLAYWRIGHT_BROWSER_POOL_SIZE=3
-      - BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
-      - LAUNCH_OPTIONS={"args":["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-background-timer-throttling","--disable-renderer-backgrounding","--disable-features=TranslateUI","--disable-extensions","--disable-default-apps","--disable-sync","--metrics-recording-only","--no-first-run","--disable-background-networking"],"timeout":45000}
-    deploy:
-      resources:
-        limits:
-          memory: 8G
-          cpus: '8.0'
-        reservations:
-          memory: 4G
-          cpus: '6.0'
-    shm_size: 8gb
-    depends_on:
-      - firecrawl_redis
+  # # ───── Scraper : Firecrawl Playwright ─────
+  # playwright_service:
+  #   image: ghcr.io/mendableai/playwright-service:latest
+  #   container_name: playwright_service
+  #   restart: unless-stopped
+  #   environment:
+  #     - PORT=3000
+  #     - NODE_OPTIONS=--max-old-space-size=8192
+  #     - BROWSER_POOL_SIZE=3
+  #     - MAX_CONCURRENT_PAGES=8
+  #     - PLAYWRIGHT_BROWSER_POOL_SIZE=3
+  #     - BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
+  #     - LAUNCH_OPTIONS={"args":["--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage","--disable-background-timer-throttling","--disable-renderer-backgrounding","--disable-features=TranslateUI","--disable-extensions","--disable-default-apps","--disable-sync","--metrics-recording-only","--no-first-run","--disable-background-networking"],"timeout":45000}
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 8G
+  #         cpus: '8.0'
+  #       reservations:
+  #         memory: 4G
+  #         cpus: '6.0'
+  #   shm_size: 8gb
+  #   depends_on:
+  #     - firecrawl_redis
 
-  # ───── Scraper : Firecrawl API ─────
-  firecrawl_api:
-    image: ghcr.io/mendableai/firecrawl:latest
-    container_name: firecrawl_api
-    restart: unless-stopped
-    command: ["pnpm","run","start:production"]     # default, but explicit is safe
-    ports:
-      - "3002:3002"
-    environment:
-      - HOST=0.0.0.0
-      - PORT=3002
-      - REDIS_URL=redis://firecrawl_redis:6379
-      - REDIS_RATE_LIMIT_URL=redis://firecrawl_redis:6379
-      - PLAYWRIGHT_MICROSERVICE_URL=http://playwright_service:3000
-      - NUM_WORKERS_PER_QUEUE=3
-      - CONCURRENCY_LIMIT=6
-      - USE_DB_AUTHENTICATION=false
-    deploy:
-      resources:
-        limits:
-          memory: 4G
-          cpus: '4.0'
-        reservations:
-          memory: 2G
-          cpus: '2.0'
-    depends_on:
-      - firecrawl_redis
-      - playwright_service
+  # # ───── Scraper : Firecrawl API ─────
+  # firecrawl_api:
+  #   image: ghcr.io/mendableai/firecrawl:latest
+  #   container_name: firecrawl_api
+  #   restart: unless-stopped
+  #   command: ["pnpm","run","start:production"]     # default, but explicit is safe
+  #   ports:
+  #     - "3002:3002"
+  #   environment:
+  #     - HOST=0.0.0.0
+  #     - PORT=3002
+  #     - REDIS_URL=redis://firecrawl_redis:6379
+  #     - REDIS_RATE_LIMIT_URL=redis://firecrawl_redis:6379
+  #     - PLAYWRIGHT_MICROSERVICE_URL=http://playwright_service:3000
+  #     - NUM_WORKERS_PER_QUEUE=3
+  #     - CONCURRENCY_LIMIT=6
+  #     - USE_DB_AUTHENTICATION=false
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 4G
+  #         cpus: '4.0'
+  #       reservations:
+  #         memory: 2G
+  #         cpus: '2.0'
+  #   depends_on:
+  #     - firecrawl_redis
+  #     - playwright_service
 
-  # ───── Scraper : Firecrawl Worker ─────
-  firecrawl_worker:
-    image: ghcr.io/mendableai/firecrawl:latest
-    container_name: firecrawl_worker
-    restart: unless-stopped
-    command: ["pnpm","run","workers"]              # switch image into worker mode
-    environment:
-      - REDIS_URL=redis://firecrawl_redis:6379
-      - REDIS_RATE_LIMIT_URL=redis://firecrawl_redis:6379
-      - PLAYWRIGHT_MICROSERVICE_URL=http://playwright_service:3000
-      - NUM_WORKERS_PER_QUEUE=3
-      - CONCURRENCY_LIMIT=6
-    deploy:
-      resources:
-        limits:
-          memory: 4G
-          cpus: '4.0'
-        reservations:
-          memory: 2G
-          cpus: '2.0'
-    depends_on:
-      - firecrawl_redis
-      - firecrawl_api
-      - playwright_service
+  # # ───── Scraper : Firecrawl Worker ─────
+  # firecrawl_worker:
+  #   image: ghcr.io/mendableai/firecrawl:latest
+  #   container_name: firecrawl_worker
+  #   restart: unless-stopped
+  #   command: ["pnpm","run","workers"]              # switch image into worker mode
+  #   environment:
+  #     - REDIS_URL=redis://firecrawl_redis:6379
+  #     - REDIS_RATE_LIMIT_URL=redis://firecrawl_redis:6379
+  #     - PLAYWRIGHT_MICROSERVICE_URL=http://playwright_service:3000
+  #     - NUM_WORKERS_PER_QUEUE=3
+  #     - CONCURRENCY_LIMIT=6
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 4G
+  #         cpus: '4.0'
+  #       reservations:
+  #         memory: 2G
+  #         cpus: '2.0'
+  #   depends_on:
+  #     - firecrawl_redis
+  #     - firecrawl_api
+  #     - playwright_service
 
 # ───── Custom Reranking Service (Disabled) ─────
 # jina_proxy:
